@@ -1,0 +1,81 @@
+[ComponentPropertiesSchema]
+Count=4
+Prop_0_Name=Min
+Prop_0_DataType=Integer
+Prop_0_DefaultValue=0
+Prop_0_Description=Minimum position
+Prop_0_AvailableOnCompilerDirectives=
+Prop_0_DesignTimeOnly=0
+Prop_1_Name=Max
+Prop_1_DataType=Integer
+Prop_1_DefaultValue=10
+Prop_1_Description=Maximum position
+Prop_1_AvailableOnCompilerDirectives=
+Prop_1_DesignTimeOnly=0
+Prop_2_Name=Position
+Prop_2_DataType=Integer
+Prop_2_DefaultValue=0
+Prop_2_Description=ScrollBar position
+Prop_2_AvailableOnCompilerDirectives=
+Prop_2_DesignTimeOnly=0
+Prop_3_Name=Direction
+Prop_3_DataType=Byte
+Prop_3_DefaultValue=CScrollBarHorizDir
+Prop_3_Description=ScrollBar direction can be horizontal or vertical.
+Prop_3_AvailableOnCompilerDirectives=
+Prop_3_DesignTimeOnly=0
+Prop_3_SkipAssignOnCodeGeneration=1
+
+[ComponentPropertiesOverrides]
+Count=2
+Prop_0_Name=Width
+Prop_0_DefaultValue=200
+Prop_1_Name=Height
+Prop_1_DefaultValue=20
+
+[ComponentEventsPropertiesSchema]
+Count=1
+Prop_0_Name=OnScrollBarChange
+Prop_0_DataType=POnScrollBarChangeEvent
+Prop_0_DefaultValue=
+Prop_0_Description=Position change event
+Prop_0_AvailableOnCompilerDirectives=
+Prop_0_DesignTimeOnly=0
+Prop_0_DataTypeDefinition=procedure _<HandlerName>_(Sender: PPtrRec);
+
+[ComponentEventsOverrides]
+Count=0
+
+[Constants]
+Count=2
+Const_0_Name=CScrollBarHorizDir
+Const_0_DataType=Integer
+Const_0_Value=0
+Const_1_Name=CScrollBarVertDir
+Const_1_DataType=Integer
+Const_1_Value=1
+
+[OneTimeComponentInitCode]
+Count=0
+
+[PerInstanceInitConstants]
+Count=0
+
+[PerInstanceInitCode]
+Count=4
+Line_0={$DEFINE _<NoString_ObjectName>__Enabled__<Enabled>_}
+Line_1={$IFDEF _<NoString_ObjectName>__Enabled_0}
+Line_2=DynTFTDisableScrollBar(_<NoString_ObjectName>_);
+Line_3={$ENDIF}
+
+[CreateComponentCode]
+Count=1
+Line_0=_<ObjectName>_ := DynTFTScrollBar_CreateWithDir(_<ScreenIndex>_, _<Left>_, _<Top>_, _<Width>_, _<Height>_, _<Direction>_);
+
+[ComponentDependencies]
+Count=1
+Comp_0_Name=DynTFTArrowButton
+
+[ComponentRegistration]
+RegisterEvents=DynTFTRegisterScrollBarEvents
+GetComponentType=DynTFTGetScrollBarComponentType

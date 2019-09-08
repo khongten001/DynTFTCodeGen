@@ -1,0 +1,198 @@
+[ComponentPropertiesSchema]
+Count=15
+Prop_0_Name=ListBox^.Items^.Font_Color
+Prop_0_DataType=TColor
+Prop_0_DefaultValue=CL_DynTFTItems_EnabledFont
+Prop_0_Description=Component font color
+Prop_0_AvailableOnCompilerDirectives=
+Prop_0_DesignTimeOnly=0
+Prop_1_Name=ListBox^.Items^.BackgroundColor
+Prop_1_DataType=TColor
+Prop_1_DefaultValue=CL_DynTFTItems_Background
+Prop_1_Description=Component color
+Prop_1_AvailableOnCompilerDirectives=
+Prop_1_DesignTimeOnly=0
+Prop_2_Name=ListBox^.Items^.ActiveFont
+Prop_2_DataType=PByte
+Prop_2_DefaultValue=@TFT_defaultFont
+Prop_2_Description=Component font
+Prop_2_AvailableOnCompilerDirectives=DynTFTFontSupport
+Prop_2_DesignTimeOnly=0
+Prop_3_Name=ListBox^.Items^.Strings
+Prop_3_DataType=Array of String[CMaxItemItemCount]
+Prop_3_DefaultValue=
+Prop_3_Description=These are the displayed items.
+Prop_3_AvailableOnCompilerDirectives=not UseExternalItems
+Prop_3_DesignTimeOnly=0
+Prop_4_Name=ListBox^.Items^.ItemHeight
+Prop_4_DataType=Word
+Prop_4_DefaultValue=15
+Prop_4_Description=Height in pixels of an item.
+Prop_4_AvailableOnCompilerDirectives=
+Prop_4_DesignTimeOnly=0
+Prop_5_Name=ListBox^.Items^.ItemIndex
+Prop_5_DataType=Integer
+Prop_5_DefaultValue=-1
+Prop_5_Description=Index of selected item
+Prop_5_AvailableOnCompilerDirectives=
+Prop_5_DesignTimeOnly=0
+Prop_6_Name=Edit^.Text
+Prop_6_DataType=String[CEditMaxTextLength]
+Prop_6_DefaultValue=
+Prop_6_Description=This is the default displayed text.
+Prop_6_AvailableOnCompilerDirectives=
+Prop_6_DesignTimeOnly=0
+Prop_7_Name=Edit^.Color
+Prop_7_DataType=TColor
+Prop_7_DefaultValue=CL_DynTFTEdit_Background
+Prop_7_Description=Component color
+Prop_7_AvailableOnCompilerDirectives=
+Prop_7_DesignTimeOnly=0
+Prop_8_Name=Edit^.Font_Color
+Prop_8_DataType=TColor
+Prop_8_DefaultValue=CL_DynTFTEdit_EnabledFont
+Prop_8_Description=Component font color
+Prop_8_AvailableOnCompilerDirectives=
+Prop_8_DesignTimeOnly=0
+Prop_9_Name=Edit^.ActiveFont
+Prop_9_DataType=PByte
+Prop_9_DefaultValue=@TFT_defaultFont
+Prop_9_Description=Component font
+Prop_9_AvailableOnCompilerDirectives=DynTFTFontSupport
+Prop_9_DesignTimeOnly=0
+Prop_10_Name=Edit^.PasswordText
+Prop_10_DataType=Boolean
+Prop_10_DefaultValue=False
+Prop_10_Description=When set, it makes the text displayed as "*".
+Prop_10_AvailableOnCompilerDirectives=
+Prop_10_DesignTimeOnly=0
+Prop_11_Name=ArrowButton^.ArrowDir
+Prop_11_DataType=Byte
+Prop_11_DefaultValue=CDownArrow
+Prop_11_Description=Arrow direction
+Prop_11_AvailableOnCompilerDirectives=
+Prop_11_DesignTimeOnly=0
+Prop_12_Name=ArrowButton^.Color
+Prop_12_DataType=TColor
+Prop_12_DefaultValue=CL_DynTFTArrowButton_Background
+Prop_12_Description=Arrow button color
+Prop_12_AvailableOnCompilerDirectives=
+Prop_12_DesignTimeOnly=0
+Prop_13_Name=Editable
+Prop_13_DataType=Boolean
+Prop_13_DefaultValue=True
+Prop_13_Description=It controls the Readonly property of the editbox.
+Prop_13_AvailableOnCompilerDirectives=
+Prop_13_DesignTimeOnly=0
+Prop_14_Name=ListBox^.Items^.Count
+Prop_14_DataType=Integer
+Prop_14_DefaultValue=0
+Prop_14_Description=Number of items. This property is internally computed and used at code generation. Do not manually edit it.
+Prop_14_AvailableOnCompilerDirectives=
+Prop_14_DesignTimeOnly=0
+Prop_14_ReadOnly=1
+
+[ComponentPropertiesOverrides]
+Count=2
+Prop_0_Name=Width
+Prop_0_DefaultValue=100
+Prop_1_Name=Height
+Prop_1_DefaultValue=20
+
+[ComponentEventsPropertiesSchema]
+Count=2
+Prop_0_Name=ListBox^.Items^.OnGetItem
+Prop_0_DataType=POnGetItemEvent
+Prop_0_DefaultValue=
+Prop_0_Description=This is called to display every item on every paint action.
+Prop_0_AvailableOnCompilerDirectives=UseExternalItems
+Prop_0_DesignTimeOnly=0
+Prop_0_DataTypeDefinition=procedure _<HandlerName>_(AItems: PPtrRec; Index: LongInt; var ItemText: string);
+Prop_1_Name=OnComboBoxCloseUp
+Prop_1_DataType=POnComboBoxCloseUpEvent
+Prop_1_DefaultValue=
+Prop_1_Description=This is called on closing the combobox.
+Prop_1_AvailableOnCompilerDirectives=
+Prop_1_DesignTimeOnly=0
+Prop_1_DataTypeDefinition=procedure _<HandlerName>_(Sender: PPtrRec);
+
+[ComponentEventsOverrides]
+Count=0
+
+[Constants]
+Count=9
+Const_0_Name=CMaxItemsStringLength
+Const_0_DataType=Integer
+Const_0_Value=19
+Const_1_Name=CMaxItemItemCount
+Const_1_DataType=Integer
+Const_1_Value=16
+Const_2_Name=CEditMaxTextLength
+Const_2_DataType=Integer
+Const_2_Value=159
+Const_3_Name=CUpArrow
+Const_3_DataType=Integer
+Const_3_Value=0
+Const_4_Name=CDownArrow
+Const_4_DataType=Integer
+Const_4_Value=1
+Const_5_Name=CLeftArrow
+Const_5_DataType=Integer
+Const_5_Value=2
+Const_6_Name=CRightArrow
+Const_6_DataType=Integer
+Const_6_Value=3
+Const_7_Name=CUndefinedArrow
+Const_7_DataType=Integer
+Const_7_Value=4
+Const_8_Name=CNoArrow
+Const_8_DataType=Integer
+Const_8_Value=255
+
+[ColorConstants]
+Count=5
+Const_0_Name=CL_DynTFTItems_Background
+Const_0_DataType=TColor
+Const_0_Value=CL_WHITE
+Const_1_Name=CL_DynTFTItems_EnabledFont
+Const_1_DataType=TColor
+Const_1_Value=CL_BLACK
+Const_2_Name=CL_DynTFTEdit_Background
+Const_2_DataType=TColor
+Const_2_Value=CL_WHITE
+Const_3_Name=CL_DynTFTEdit_EnabledFont
+Const_3_DataType=TColor
+Const_3_Value=CL_BLACK
+Const_4_Name=CL_DynTFTArrowButton_Background
+Const_4_DataType=TColor
+Const_4_Value=CL_LIGHTBLUE
+
+[OneTimeComponentInitCode]
+Count=0
+
+[PerInstanceInitConstants]
+Count=0
+
+[PerInstanceInitCode]
+Count=4
+Line_0={$DEFINE _<NoString_ObjectName>__Enabled__<Enabled>_}
+Line_1={$IFDEF _<NoString_ObjectName>__Enabled_0}
+Line_2=DynTFTDisableComboBox(_<NoString_ObjectName>_);
+Line_3={$ENDIF}
+
+[CreateComponentCode]
+Count=1
+Line_0=_<ObjectName>_ := DynTFTComboBox_Create(_<ScreenIndex>_, _<Left>_, _<Top>_, _<Width>_, _<Height>_);
+
+[ComponentDependencies]
+Count=6
+Comp_0_Name=DynTFTArrowButton
+Comp_1_Name=DynTFTScrollBar
+Comp_2_Name=DynTFTEdit
+Comp_3_Name=DynTFTItems
+Comp_4_Name=DynTFTListBox
+Comp_5_Name=DynTFTLabel
+
+[ComponentRegistration]
+RegisterEvents=DynTFTRegisterComboBoxEvents
+GetComponentType=DynTFTGetComboBoxComponentType
