@@ -1,5 +1,5 @@
 [ComponentPropertiesSchema]
-Count=17
+Count=19
 Prop_0_Name=ScreenIndex
 Prop_0_DataType=Integer
 Prop_0_DefaultValue=
@@ -102,6 +102,24 @@ Prop_16_DefaultValue=True
 Prop_16_Description=Set to False, to prevent the component from processing events(messages).
 Prop_16_AvailableOnCompilerDirectives=
 Prop_16_DesignTimeOnly=0
+Prop_17_Name=ManualCreationGroup
+Prop_17_DataType=String
+Prop_17_DefaultValue=
+Prop_17_Description=Group name of two procedures, where multiple components are created and destroyed together, under user control. Used when CreatedAtStartup is False. Component "constructor" call is placed in CreateGUIGrp_<group_name> and "destructor" call is placed in DestroyGUIGrp_<group_name>. You can call these when switching the active screen, for example. Component state will have to be manually restored though.
+Prop_17_AvailableOnCompilerDirectives=
+Prop_17_DesignTimeOnly=1
+Prop_18_Name=UseBinaryEncoding
+Prop_18_DataType=Boolean
+Prop_18_DefaultValue=False
+Prop_18_Description=When true, the component is created and its properties are set using an instruction based mechanism, from binary data. When multiple components are created this way, the overall code size is smaller. This also allows creating UIs from external storage.
+Prop_18_AvailableOnCompilerDirectives=RTTIREG
+Prop_18_DesignTimeOnly=1
+;Prop_19_Name=Name
+;Prop_19_DataType=String
+;Prop_19_DefaultValue=
+;Prop_19_Description=Component name used for debugging.
+;Prop_19_AvailableOnCompilerDirectives=ComponentsHaveName
+;Prop_19_DesignTimeOnly=0
 
 [ComponentEventsPropertiesSchema]
 Count=4

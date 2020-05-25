@@ -1,0 +1,18 @@
+unit DynTFTGUIObjects;
+
+{$IFNDEF IsMCU}
+  {$DEFINE IsDesktop}
+{$ENDIF}
+
+{$IFDEF IsDesktop}
+interface
+{$ENDIF}
+
+uses
+  DynTFTTypes, DynTFTConsts,
+
+//<DynTFTComponents>
+
+  {$I DynTFTGUIAdditionalUnits.inc}
+  ;
+

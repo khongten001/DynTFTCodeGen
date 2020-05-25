@@ -1,0 +1,26 @@
+
+procedure DynTFT_GUI_Start;
+begin
+  {$IFDEF IsDesktop}
+    DynTFT_DebugConsole('Entering DynTFT_GUI_Start');
+
+    {$IFDEF RTTIREG}
+      InitAllBinGUIObjectsToNil;
+    {$ENDIF}
+  {$ENDIF}
+
+  {$IFDEF RTTIREG}
+    LinkHandlers;
+  {$ENDIF}
+
+  DynTFTInitInputDevStateFlags;
+
+  DynTFTInitComponentTypeRegistration;
+  DynTFTInitComponentContainers;    //must be called after InitComponentTypeRegistration
+  RegisterAllComponentsEvents;
+
+  SetScreenActivity;
+  DrawGUI;
+end;
+
+end.

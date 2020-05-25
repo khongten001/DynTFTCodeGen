@@ -83,11 +83,14 @@ Prop_12_DesignTimeOnly=1
 Prop_12_ReadOnly=1
 
 [ComponentPropertiesOverrides]
-Count=2
+Count=3
 Prop_0_Name=Width
 Prop_0_DefaultValue=200
 Prop_1_Name=Height
 Prop_1_DefaultValue=30
+Prop_2_Name=UseBinaryEncoding
+Prop_2_DefaultValue=False
+Prop_2_ReadOnly=1
 
 [ComponentEventsPropertiesSchema]
 Count=1
@@ -129,40 +132,45 @@ Const_2_Name=CL_DynTFTTabButton_EnabledFont
 Const_2_DataType=TColor
 Const_2_Value=CL_BLACK
 
-[OneTimeComponentInitCode]
-Count=32
+[OneTimeComponentInitCode_Interface]
+Count=8
 Line_0=//PageControl code
 Line_1=type
 Line_2=TTabButtonCaption = string[CMaxTabButtonStringLength];
 Line_3=TTabButtonCaptionArr = array{$IFDEF IsMCU}[0..0]{$ENDIF} of TTabButtonCaption;
 Line_4=TTabButtonIntegerArr = array{$IFDEF IsMCU}[0..0]{$ENDIF} of Integer;
 Line_5=
-Line_6=procedure PDynTFTPageControl_CreateTabButton(Left, Top, Width, Height: Integer; {$IFDEF IsMCU} var {$ENDIF}Caption: string; Parent: PDynTFTPageControl);
-Line_7=var
-Line_8=tabbtn: PDynTFTTabButton;
-Line_9=begin
-Line_10=tabbtn := DynTFTTabButton_Create(Parent^.BaseProps.ScreenIndex, Left, Top, Width, Height);
-Line_11=tabbtn^.Caption := Caption;
-Line_12=DynTFTAddTabButtonToPageControl(Parent, tabbtn);
-Line_13=end;
-Line_14=
-Line_15=procedure PDynTFTPageControl_CreateAllTabButtonsAsHorizontal(Left, Top, Height, PageCount: Integer; {$IFDEF IsMCU}var Lefts, Widths: TTabButtonIntegerArr {$ELSE} const Lefts, Widths: array of Integer{$ENDIF}; Parent: PDynTFTPageControl; {$IFDEF IsMCU}var Captions: TTabButtonCaptionArr{$ELSE} const Captions: array of TTabButtonCaption{$ENDIF});
-Line_16=var
-Line_17=i, ButtonCount_1: Integer;
-Line_18=begin
-Line_19=ButtonCount_1 := PageCount - 1;
-Line_20=for i := 0 to ButtonCount_1 do
-Line_21=PDynTFTPageControl_CreateTabButton(Left + Lefts[i], Top, Widths[i], Height, Captions[i], Parent);
-Line_22=end;
-Line_23=
-Line_24=procedure PDynTFTPageControl_CreateAllTabButtonsAsVertical(Left, Top, Width, Height, PageCount: Integer; Parent: PDynTFTPageControl; {$IFDEF IsMCU}var Captions: TTabButtonCaptionArr{$ELSE} const Captions: array of TTabButtonCaption{$ENDIF});
-Line_25=var
-Line_26=i, ButtonCount_1: Integer;
-Line_27=begin
-Line_28=ButtonCount_1 := PageCount - 1;
-Line_29=for i := 0 to ButtonCount_1 do
-Line_30=PDynTFTPageControl_CreateTabButton(Left, Top + i * Height, Width, Height, Captions[i], Parent);
-Line_31=end;
+Line_6=procedure PDynTFTPageControl_CreateAllTabButtonsAsHorizontal(Left, Top, Height, PageCount: Integer; {$IFDEF IsMCU}var Lefts, Widths: TTabButtonIntegerArr {$ELSE} const Lefts, Widths: array of Integer{$ENDIF}; Parent: PDynTFTPageControl; {$IFDEF IsMCU}var Captions: TTabButtonCaptionArr{$ELSE} const Captions: array of TTabButtonCaption{$ENDIF});
+Line_7=procedure PDynTFTPageControl_CreateAllTabButtonsAsVertical(Left, Top, Width, Height, PageCount: Integer; Parent: PDynTFTPageControl; {$IFDEF IsMCU}var Captions: TTabButtonCaptionArr{$ELSE} const Captions: array of TTabButtonCaption{$ENDIF});
+
+[OneTimeComponentInitCode_Implementation]
+Count=27
+Line_0=procedure PDynTFTPageControl_CreateTabButton(Left, Top, Width, Height: Integer; {$IFDEF IsMCU} var {$ENDIF}Caption: string; Parent: PDynTFTPageControl);
+Line_1=var
+Line_2=tabbtn: PDynTFTTabButton;
+Line_3=begin
+Line_4=tabbtn := DynTFTTabButton_Create(Parent^.BaseProps.ScreenIndex, Left, Top, Width, Height);
+Line_5=tabbtn^.Caption := Caption;
+Line_6=DynTFTAddTabButtonToPageControl(Parent, tabbtn);
+Line_7=end;
+Line_8=
+Line_9=procedure PDynTFTPageControl_CreateAllTabButtonsAsHorizontal(Left, Top, Height, PageCount: Integer; {$IFDEF IsMCU}var Lefts, Widths: TTabButtonIntegerArr {$ELSE} const Lefts, Widths: array of Integer{$ENDIF}; Parent: PDynTFTPageControl; {$IFDEF IsMCU}var Captions: TTabButtonCaptionArr{$ELSE} const Captions: array of TTabButtonCaption{$ENDIF});
+Line_10=var
+Line_11=i, ButtonCount_1: Integer;
+Line_12=begin
+Line_13=ButtonCount_1 := PageCount - 1;
+Line_14=for i := 0 to ButtonCount_1 do
+Line_16=PDynTFTPageControl_CreateTabButton(Left + Lefts[i], Top, Widths[i], Height, Captions[i], Parent);
+Line_17=end;
+Line_18=
+Line_19=procedure PDynTFTPageControl_CreateAllTabButtonsAsVertical(Left, Top, Width, Height, PageCount: Integer; Parent: PDynTFTPageControl; {$IFDEF IsMCU}var Captions: TTabButtonCaptionArr{$ELSE} const Captions: array of TTabButtonCaption{$ENDIF});
+Line_20=var
+Line_21=i, ButtonCount_1: Integer;
+Line_22=begin
+Line_23=ButtonCount_1 := PageCount - 1;
+Line_24=for i := 0 to ButtonCount_1 do
+Line_25=PDynTFTPageControl_CreateTabButton(Left, Top + i * Height, Width, Height, Captions[i], Parent);
+Line_26=end;
 
 [PerInstanceInitConstants]
 Count=3

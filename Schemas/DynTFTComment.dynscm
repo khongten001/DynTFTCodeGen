@@ -26,7 +26,7 @@ Prop_3_AvailableOnCompilerDirectives=DynTFTFontSupport
 Prop_3_DesignTimeOnly=1
 
 [ComponentPropertiesOverrides]
-Count=8
+Count=10
 Prop_0_Name=Width
 Prop_0_DefaultValue=150
 Prop_1_Name=Height
@@ -49,6 +49,12 @@ Prop_6_ReadOnly=1
 Prop_7_Name=CanHandleMessages
 Prop_7_DefaultValue=0
 Prop_7_ReadOnly=1
+Prop_8_Name=UseBinaryEncoding
+Prop_8_DefaultValue=False
+Prop_8_ReadOnly=1
+Prop_9_Name=ManualCreationGroup
+Prop_9_DefaultValue=
+Prop_9_ReadOnly=1
 
 [ComponentEventsPropertiesSchema]
 Count=0

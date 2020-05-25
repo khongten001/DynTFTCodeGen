@@ -1,0 +1,31 @@
+unit DynTFTGUI;
+
+{$IFNDEF IsMCU}
+  {$DEFINE IsDesktop}
+{$ENDIF} 
+
+{$IFDEF IsDesktop}
+interface
+{$ENDIF}
+
+uses
+  DynTFTTypes, DynTFTConsts, DynTFTUtils, DynTFTBaseDrawing,
+  DynTFTGUIObjects, DynTFTHandlers,
+
+//<DynTFTComponents>
+  
+  {$IFDEF IsDesktop}
+    , SysUtils
+    {$IFDEF DynTFTFontSupport}, DynTFTFonts {$ENDIF}
+  {$ENDIF}
+
+  {$I DynTFTGUIAdditionalUnits.inc}
+  ;
+
+
+procedure DynTFT_GUI_Start;
+procedure DrawGUI; //Made available for debugging or various performance improvements. Called by DynTFT_GUI_Start.
+
+
+implementation
+

@@ -70,11 +70,14 @@ Prop_10_DesignTimeOnly=1
 Prop_10_ReadOnly=1
 
 [ComponentPropertiesOverrides]
-Count=2
+Count=3
 Prop_0_Name=Width
 Prop_0_DefaultValue=200
 Prop_1_Name=Height
 Prop_1_DefaultValue=100
+Prop_2_Name=UseBinaryEncoding
+Prop_2_DefaultValue=False
+Prop_2_ReadOnly=1
 
 [ComponentEventsPropertiesSchema]
 Count=1
@@ -110,30 +113,34 @@ Const_1_Name=CL_DynTFTRadioGroup_EnabledFont
 Const_1_DataType=TColor
 Const_1_Value=CL_BLACK
 
-[OneTimeComponentInitCode]
-Count=22
+[OneTimeComponentInitCode_Interface]
+Count=6
 Line_0=//RadioGroup code
 Line_1=type
 Line_2=TRadioButtonCaption = string[CMaxRadioButtonStringLength];
 Line_3=TRadioButtonCaptionArr = array{$IFDEF IsMCU}[0..0]{$ENDIF} of TRadioButtonCaption;
 Line_4=
-Line_5=procedure PDynTFTRadioGroup_CreateRadioButton(Left, Top, Width, Height: Integer; {$IFDEF IsMCU} var {$ENDIF}Caption: string; Parent: PDynTFTRadioGroup);
-Line_6=var
-Line_7=radbtn: PDynTFTRadioButton;
-Line_8=begin
-Line_9=radbtn := DynTFTRadioButton_Create(Parent^.BaseProps.ScreenIndex, Left, Top, Width, Height);
-Line_10=radbtn^.Caption := Caption;
-Line_11=DynTFTAddRadioButtonToRadioGroup(Parent, radbtn);
-Line_12=end;
-Line_13=
-Line_14=procedure PDynTFTRadioGroup_CreateAllRadioButtons(Left, Top, Width, Height, ButtonCount: Integer; Parent: PDynTFTRadioGroup; {$IFDEF IsMCU}var Captions: TRadioButtonCaptionArr{$ELSE} const Captions: array of TRadioButtonCaption{$ENDIF});
-Line_15=var
-Line_16=i, ButtonCount_1: Integer;
-Line_17=begin
-Line_18=ButtonCount_1 := ButtonCount - 1;
-Line_19=for i := 0 to ButtonCount_1 do
-Line_20=PDynTFTRadioGroup_CreateRadioButton(Left, Top + i * Height, Width, Height, Captions[i], Parent);
-Line_21=end;
+Line_5=procedure PDynTFTRadioGroup_CreateAllRadioButtons(Left, Top, Width, Height, ButtonCount: Integer; Parent: PDynTFTRadioGroup; {$IFDEF IsMCU}var Captions: TRadioButtonCaptionArr{$ELSE} const Captions: array of TRadioButtonCaption{$ENDIF});
+
+[OneTimeComponentInitCode_Implementation]
+Count=17
+Line_0=procedure PDynTFTRadioGroup_CreateRadioButton(Left, Top, Width, Height: Integer; {$IFDEF IsMCU} var {$ENDIF}Caption: string; Parent: PDynTFTRadioGroup);
+Line_1=var
+Line_2=radbtn: PDynTFTRadioButton;
+Line_3=begin
+Line_4=radbtn := DynTFTRadioButton_Create(Parent^.BaseProps.ScreenIndex, Left, Top, Width, Height);
+Line_5=radbtn^.Caption := Caption;
+Line_6=DynTFTAddRadioButtonToRadioGroup(Parent, radbtn);
+Line_7=end;
+Line_8=
+Line_9=procedure PDynTFTRadioGroup_CreateAllRadioButtons(Left, Top, Width, Height, ButtonCount: Integer; Parent: PDynTFTRadioGroup; {$IFDEF IsMCU}var Captions: TRadioButtonCaptionArr{$ELSE} const Captions: array of TRadioButtonCaption{$ENDIF});
+Line_10=var
+Line_11=i, ButtonCount_1: Integer;
+Line_12=begin
+Line_13=ButtonCount_1 := ButtonCount - 1;
+Line_14=for i := 0 to ButtonCount_1 do
+Line_15=PDynTFTRadioGroup_CreateRadioButton(Left, Top + i * Height, Width, Height, Captions[i], Parent);
+Line_16=end;
 
 [PerInstanceInitConstants]
 Count=1

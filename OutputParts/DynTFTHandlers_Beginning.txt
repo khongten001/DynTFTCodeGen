@@ -1,0 +1,42 @@
+unit DynTFTHandlers;
+
+{$IFNDEF IsMCU}
+  {$DEFINE IsDesktop}
+{$ENDIF}
+
+{$IFDEF IsDesktop}
+interface
+{$ENDIF}
+
+uses
+  {$IFDEF UseSmallMM}
+    DynTFTSmallMM,
+  {$ELSE}
+    {$IFDEF IsDesktop}
+      MemManager,
+    {$ENDIF}
+  {$ENDIF} //this must be the first unit, at least in Delphi, because it exports GetMem.
+  
+  DynTFTTypes, DynTFTConsts, DynTFTUtils, DynTFTBaseDrawing, DynTFTControls,
+  DynTFTGUIObjects,
+
+//<DynTFTComponents>
+
+  {$IFDEF IsDesktop}
+    ,SysUtils, Forms
+    {$IFDEF DynTFTFontSupport}, DynTFTFonts {$ENDIF}
+  {$ENDIF}
+
+  {$IFNDEF UserTFTCommands}
+    {$IFDEF IsDesktop} , TFT {$ENDIF}
+  {$ELSE}
+    , {$I UserDrawingUnits.inc}
+  {$ENDIF}
+
+  {$I DynTFTHandlersAdditionalUnits.inc}
+  ;
+
+  {$IFDEF UseHandlersAdditionalCodeInInterface}
+    {$I DynTFTHandlersAdditionalCodeInInterface.inc} //Can be used to specify external functions, vars, consts
+  {$ENDIF}
+
