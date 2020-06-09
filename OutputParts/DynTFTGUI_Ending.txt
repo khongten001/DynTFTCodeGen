@@ -20,6 +20,12 @@ begin
   RegisterAllComponentsEvents;
 
   SetScreenActivity;
+
+  {$IFDEF RTTIREG}
+    if not CheckIntegerAndPointerSize then
+      Exit;
+  {$ENDIF}
+
   DrawGUI;
 end;
 
