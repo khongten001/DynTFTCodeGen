@@ -122,8 +122,10 @@ Count=1
 Line_0=_<ObjectName>_ := DynTFTListBox_Create(_<ScreenIndex>_, _<Left>_, _<Top>_, _<Width>_, _<Height>_);
 
 [ComponentDependencies]
-Count=1
+Count=3
 Comp_0_Name=DynTFTItems
+Comp_1_Name=DynTFTScrollBar
+Comp_2_Name=DynTFTArrowButton
 
 [ComponentRegistration]
 RegisterEvents=DynTFTRegisterListBoxEvents
