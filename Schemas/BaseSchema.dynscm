@@ -1,5 +1,5 @@
 [ComponentPropertiesSchema]
-Count=19
+Count=20
 Prop_0_Name=ScreenIndex
 Prop_0_DataType=Integer
 Prop_0_DefaultValue=
@@ -114,12 +114,19 @@ Prop_18_DefaultValue=False
 Prop_18_Description=When true, the component is created and its properties are set using an instruction based mechanism, from binary data. When multiple components are created this way, the overall code size is smaller. This also allows creating UIs from external storage.
 Prop_18_AvailableOnCompilerDirectives=RTTIREG
 Prop_18_DesignTimeOnly=1
-;Prop_19_Name=Name
-;Prop_19_DataType=String
-;Prop_19_DefaultValue=
-;Prop_19_Description=Component name used for debugging.
-;Prop_19_AvailableOnCompilerDirectives=ComponentsHaveName
-;Prop_19_DesignTimeOnly=0
+Prop_19_Name=Plugin
+Prop_19_DataType=String
+Prop_19_DefaultValue=
+Prop_19_Description=Plugin name.
+Prop_19_AvailableOnCompilerDirectives=
+Prop_19_DesignTimeOnly=1
+Prop_19_ReadOnly=1
+;Prop_20_Name=Name
+;Prop_20_DataType=String
+;Prop_20_DefaultValue=
+;Prop_20_Description=Component name used for debugging.
+;Prop_20_AvailableOnCompilerDirectives=ComponentsHaveName
+;Prop_20_DesignTimeOnly=0
 
 [ComponentEventsPropertiesSchema]
 Count=4

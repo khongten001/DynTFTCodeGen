@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="DynTFTCGSystem.ppr"/>
+        <FRMtype Value="0"/>
+        <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="0"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="13"/>
+        <CursorPos X="32" Y="33"/>
+        <UsageCount Value="54"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="DynTFTCodeGenImgForm.pas"/>
+        <FRMtype Value="200"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmImg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="3"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="6"/>
+        <CursorPos X="9" Y="37"/>
+        <UsageCount Value="54"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="ComponentIcons.pas"/>
+        <FRMtype Value="200"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="54"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\System\PanelDrawing.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1083"/>
+        <CursorPos X="38" Y="1083"/>
+        <UsageCount Value="54"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\DynTFTCodeGenSharedDataTypes.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="4"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="51"/>
+        <CursorPos X="47" Y="58"/>
+        <UsageCount Value="54"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\DynTFTPluginUtils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="5"/>
+        <WindowIndex Value="0"/>
+        <CursorPos X="37" Y="14"/>
+        <UsageCount Value="54"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\DynTFTSharedUtils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="54"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\DynTFT\DynTFTConsts.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="54"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\System\DynTFTCGSystemExportedFunctions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <CursorPos X="15" Y="2"/>
+        <UsageCount Value="54"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\DynTFT\DynTFTItems.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <UsageCount Value="16"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\System\DynTFTColorThemeGenLiveColors.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="109"/>
+        <CursorPos X="6" Y="117"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+    </Units>
+    <JumpHistory HistoryIndex="14">
+      <Position>
+        <Filename Value="..\System\PanelDrawing.pas"/>
+        <Caret Line="508" TopLine="489"/>
+      </Position>
+      <Position>
+        <Filename Value="..\System\PanelDrawing.pas"/>
+      </Position>
+      <Position>
+        <Filename Value="..\System\PanelDrawing.pas"/>
+        <Caret Line="75" Column="24" TopLine="62"/>
+      </Position>
+      <Position>
+        <Filename Value="..\System\PanelDrawing.pas"/>
+        <Caret Line="1107" Column="28" TopLine="1094"/>
+      </Position>
+      <Position>
+        <Filename Value="..\System\PanelDrawing.pas"/>
+        <Caret Line="1134" Column="75" TopLine="1116"/>
+      </Position>
+      <Position>
+        <Filename Value="..\System\PanelDrawing.pas"/>
+        <Caret Line="75" Column="24" TopLine="58"/>
+      </Position>
+      <Position>
+        <Filename Value="..\System\PanelDrawing.pas"/>
+        <Caret Line="1100" Column="44" TopLine="1094"/>
+      </Position>
+      <Position>
+        <Filename Value="..\System\PanelDrawing.pas"/>
+        <Caret Line="386" Column="25" TopLine="363"/>
+      </Position>
+      <Position>
+        <Filename Value="..\System\PanelDrawing.pas"/>
+        <Caret Line="901" Column="28" TopLine="886"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCodeGenImgForm.pas"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCodeGenImgForm.pas"/>
+        <Caret Line="37" Column="8" TopLine="5"/>
+      </Position>
+      <Position>
+        <Filename Value="..\System\PanelDrawing.pas"/>
+        <Caret Line="10" Column="32" TopLine="7"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGSystem.ppr"/>
+        <Caret Line="27" Column="17" TopLine="13"/>
+      </Position>
+      <Position>
+        <Filename Value="..\System\PanelDrawing.pas"/>
+        <Caret Line="1083" Column="38" TopLine="1083"/>
+      </Position>
+      <Position>
+        <Filename Value="..\System\DynTFTColorThemeGenLiveColors.pas"/>
+        <Caret Line="126" Column="6" TopLine="109"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+  <Debugging>
+    <BreakPoints>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="D:\DynTFT\DynTFTItems.pas"/>
+        <Line Value="291"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="D:\DynTFT\DynTFTItems.pas"/>
+        <Line Value="390"/>
+      </Item>
+    </BreakPoints>
+  </Debugging>
+</CONFIG>

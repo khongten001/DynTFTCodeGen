@@ -1,0 +1,87 @@
+[ComponentPropertiesSchema]
+Count=5
+Prop_0_Name=UpCaption
+Prop_0_DataType=String[CMaxKeyButtonStringLength]
+Prop_0_DefaultValue=
+Prop_0_Description=This is the displayed text on the upper row.
+Prop_0_AvailableOnCompilerDirectives=
+Prop_0_DesignTimeOnly=0
+Prop_1_Name=DownCaption
+Prop_1_DataType=String[CMaxKeyButtonStringLength]
+Prop_1_DefaultValue=
+Prop_1_Description=This is the displayed text on the lower row.
+Prop_1_AvailableOnCompilerDirectives=
+Prop_1_DesignTimeOnly=0
+Prop_2_Name=Color
+Prop_2_DataType=TColor
+Prop_2_DefaultValue=CL_DynTFTKeyButton_Background
+Prop_2_Description=Component color
+Prop_2_AvailableOnCompilerDirectives=
+Prop_2_DesignTimeOnly=0
+Prop_3_Name=Font_Color
+Prop_3_DataType=TColor
+Prop_3_DefaultValue=CL_DynTFTKeyButton_EnabledFont
+Prop_3_Description=Component font color
+Prop_3_AvailableOnCompilerDirectives=
+Prop_3_DesignTimeOnly=0
+Prop_4_Name=ActiveFont
+Prop_4_DataType=PByte
+Prop_4_DefaultValue=@TFT_defaultFont
+Prop_4_Description=Component font
+Prop_4_AvailableOnCompilerDirectives=DynTFTFontSupport
+Prop_4_DesignTimeOnly=0
+
+[ComponentPropertiesOverrides]
+Count=2
+Prop_0_Name=Width
+Prop_0_DefaultValue=23
+Prop_1_Name=Height
+Prop_1_DefaultValue=40
+
+[ComponentEventsPropertiesSchema]
+Count=1
+Prop_0_Name=OnGenerateDrawingUser
+Prop_0_DataType=PDynTFTGenericEventHandler
+Prop_0_DefaultValue=
+Prop_0_Description=Event used to draw something on the button.
+Prop_0_AvailableOnCompilerDirectives=
+Prop_0_DesignTimeOnly=0
+Prop_0_DataTypeDefinition=procedure _<HandlerName>_(ABase: PDynTFTBaseComponent);
+
+[ComponentEventsOverrides]
+Count=0
+
+[Constants]
+Count=1
+Const_0_Name=CMaxKeyButtonStringLength
+Const_0_DataType=Integer
+Const_0_Value=11
+
+[ColorConstants]
+Count=2
+Const_0_Name=CL_DynTFTKeyButton_Background
+Const_0_DataType=TColor
+Const_0_Value=CL_LIGHTBLUE
+Const_1_Name=CL_DynTFTKeyButton_EnabledFont
+Const_1_DataType=TColor
+Const_1_Value=CL_BLACK
+
+[OneTimeComponentInitCode]
+Count=0
+
+[PerInstanceInitConstants]
+Count=0
+
+[PerInstanceInitCode]
+Count=0
+
+[CreateComponentCode]
+Count=1
+Line_0=_<ObjectName>_ := DynTFTKeyButton_Create(_<ScreenIndex>_, _<Left>_, _<Top>_, _<Width>_, _<Height>_);
+
+[ComponentDependencies]
+Count=0
+
+[ComponentRegistration]
+RegisterEvents=DynTFTRegisterKeyButtonEvents
+GetComponentType=DynTFTGetKeyButtonComponentType

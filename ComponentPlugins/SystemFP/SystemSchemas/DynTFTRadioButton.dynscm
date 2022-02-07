@@ -1,20 +1,20 @@
 [ComponentPropertiesSchema]
-Count=4
+Count=5
 Prop_0_Name=Caption
-Prop_0_DataType=String[CMaxButtonStringLength]
+Prop_0_DataType=String[CMaxRadioButtonStringLength]
 Prop_0_DefaultValue=
 Prop_0_Description=This is the displayed text.
 Prop_0_AvailableOnCompilerDirectives=
 Prop_0_DesignTimeOnly=0
 Prop_1_Name=Color
 Prop_1_DataType=TColor
-Prop_1_DefaultValue=CL_DynTFTButton_Background
+Prop_1_DefaultValue=CL_DynTFTRadioButton_Background
 Prop_1_Description=Component color
 Prop_1_AvailableOnCompilerDirectives=
 Prop_1_DesignTimeOnly=0
 Prop_2_Name=Font_Color
 Prop_2_DataType=TColor
-Prop_2_DefaultValue=CL_DynTFTButton_EnabledFont
+Prop_2_DefaultValue=CL_DynTFTRadioButton_EnabledFont
 Prop_2_Description=Component font color
 Prop_2_AvailableOnCompilerDirectives=
 Prop_2_DesignTimeOnly=0
@@ -24,13 +24,19 @@ Prop_3_DefaultValue=@TFT_defaultFont
 Prop_3_Description=Component font
 Prop_3_AvailableOnCompilerDirectives=DynTFTFontSupport
 Prop_3_DesignTimeOnly=0
+Prop_4_Name=Checked
+Prop_4_DataType=Boolean
+Prop_4_DefaultValue=False
+Prop_4_Description=Buton selected state
+Prop_4_AvailableOnCompilerDirectives=
+Prop_4_DesignTimeOnly=0
 
 [ComponentPropertiesOverrides]
 Count=2
 Prop_0_Name=Width
-Prop_0_DefaultValue=150
+Prop_0_DefaultValue=170
 Prop_1_Name=Height
-Prop_1_DefaultValue=30
+Prop_1_DefaultValue=20
 
 [ComponentEventsPropertiesSchema]
 Count=0
@@ -40,16 +46,16 @@ Count=0
 
 [Constants]
 Count=1
-Const_0_Name=CMaxButtonStringLength
+Const_0_Name=CMaxRadioButtonStringLength
 Const_0_DataType=Integer
 Const_0_Value=19
 
 [ColorConstants]
 Count=2
-Const_0_Name=CL_DynTFTButton_Background
+Const_0_Name=CL_DynTFTRadioButton_Background
 Const_0_DataType=TColor
 Const_0_Value=CL_LIGHTBLUE
-Const_1_Name=CL_DynTFTButton_EnabledFont
+Const_1_Name=CL_DynTFTRadioButton_EnabledFont
 Const_1_DataType=TColor
 Const_1_Value=CL_BLACK
 
@@ -64,11 +70,11 @@ Count=0
 
 [CreateComponentCode]
 Count=1
-Line_0=_<ObjectName>_ := DynTFTButton_Create(_<ScreenIndex>_, _<Left>_, _<Top>_, _<Width>_, _<Height>_);
+Line_0=_<ObjectName>_ := DynTFTRadioButton_Create(_<ScreenIndex>_, _<Left>_, _<Top>_, _<Width>_, _<Height>_);
 
 [ComponentDependencies]
 Count=0
 
 [ComponentRegistration]
-RegisterEvents=DynTFTRegisterButtonEvents
-GetComponentType=DynTFTGetButtonComponentType
+RegisterEvents=DynTFTRegisterRadioButtonEvents
+GetComponentType=DynTFTGetRadioButtonComponentType

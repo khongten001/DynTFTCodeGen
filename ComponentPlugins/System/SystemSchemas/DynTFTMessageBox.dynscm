@@ -59,6 +59,27 @@ Const_7_Name=CDynTFT_MB_RETRYCANCEL
 Const_7_DataType=Integer
 Const_7_Value=5
 
+[ColorConstants]
+Count=6
+Const_0_Name=CL_DynTFTMessageBox_LightEdge
+Const_0_DataType=TColor
+Const_0_Value=CL_WHITE
+Const_1_Name=CL_DynTFTMessageBox_DarkEdge
+Const_1_DataType=TColor
+Const_1_Value=CL_GRAY
+Const_2_Name=CL_DynTFTMessageBox_Background
+Const_2_DataType=TColor
+Const_2_Value=CL_LIGHTGRAY
+Const_3_Name=CL_DynTFTMessageBox_TitleBar
+Const_3_DataType=TColor
+Const_3_Value=CL_HIGHLIGHT
+Const_4_Name=CL_DynTFTMessageBox_MessageFont
+Const_4_DataType=TColor
+Const_4_Value=CL_BLACK
+Const_5_Name=CL_DynTFTMessageBox_TitleFont
+Const_5_DataType=TColor
+Const_5_Value=CL_WHITE
+
 [OneTimeComponentInitCode]
 Count=0
 

@@ -55,6 +55,18 @@ Const_1_Name=CScrollBarVertDir
 Const_1_DataType=Integer
 Const_1_Value=1
 
+[ColorConstants]
+Count=3
+Const_0_Name=CL_DynTFTScrollBar_EnabledBackground
+Const_0_DataType=TColor
+Const_0_Value=CL_LIGHTBLUE
+Const_1_Name=CL_DynTFTScrollBar_DisabledBackground
+Const_1_DataType=TColor
+Const_1_Value=CL_LIGHTGRAY
+Const_2_Name=CL_DynTFTScrollBar_PanelBackground
+Const_2_DataType=TColor
+Const_2_Value=CL_SILVER
+
 [OneTimeComponentInitCode]
 Count=0
 

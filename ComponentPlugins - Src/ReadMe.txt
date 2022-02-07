@@ -1,0 +1,1 @@
+You will have to copy the "Schemas" directories for each plugin, from where the binaries are located.

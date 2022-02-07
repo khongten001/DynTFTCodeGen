@@ -1,0 +1,76 @@
+[ComponentPropertiesSchema]
+Count=1
+Prop_0_Name=Color
+Prop_0_DataType=TColor
+Prop_0_DefaultValue=CL_DynTFTVirtualKeyboard_Background
+Prop_0_Description=Component color
+Prop_0_AvailableOnCompilerDirectives=
+Prop_0_DesignTimeOnly=0
+
+[ComponentPropertiesOverrides]
+Count=6
+Prop_0_Name=Width
+Prop_0_DefaultValue=319
+Prop_1_Name=Height
+Prop_1_DefaultValue=185
+Prop_2_Name=MinWidth
+Prop_2_DefaultValue=319
+Prop_3_Name=MaxWidth
+Prop_3_DefaultValue=319
+Prop_4_Name=MinHeight
+Prop_4_DefaultValue=185
+Prop_5_Name=MaxHeight
+Prop_5_DefaultValue=185
+
+[ComponentEventsPropertiesSchema]
+Count=2
+Prop_0_Name=OnCharKey
+Prop_0_DataType=POnVirtualKeyboardCharKeyPressedEvent
+Prop_0_DefaultValue=
+Prop_0_Description=Event used when pressing a "char" key button.
+Prop_0_AvailableOnCompilerDirectives=
+Prop_0_DesignTimeOnly=0
+Prop_0_DataTypeDefinition=procedure _<HandlerName>_(Sender: PPtrRec; var PressedChar: TVKPressedChar; CurrentShiftState: TPtr);
+Prop_1_Name=OnSpecialKey
+Prop_1_DataType=POnVirtualKeyboardSpecialKeyPressedEvent
+Prop_1_DefaultValue=
+Prop_1_Description=Event used when pressing a "special" key button.
+Prop_1_AvailableOnCompilerDirectives=
+Prop_1_DesignTimeOnly=0
+Prop_1_DataTypeDefinition=procedure _<HandlerName>_(Sender: PPtrRec; SpecialKey: Integer; CurrentShiftState: TPtr);
+
+[ComponentEventsOverrides]
+Count=0
+
+[Constants]
+Count=1
+Const_0_Name=CMaxKeyButtonStringLength
+Const_0_DataType=Integer
+Const_0_Value=11
+
+[ColorConstants]
+Count=1
+Const_0_Name=CL_DynTFTVirtualKeyboard_Background
+Const_0_DataType=TColor
+Const_0_Value=CL_LIGHTBLUE
+
+[OneTimeComponentInitCode]
+Count=0
+
+[PerInstanceInitConstants]
+Count=0
+
+[PerInstanceInitCode]
+Count=0
+
+[CreateComponentCode]
+Count=1
+Line_0=_<ObjectName>_ := DynTFTVirtualKeyboard_Create(_<ScreenIndex>_, _<Left>_, _<Top>_, _<Width>_, _<Height>_);
+
+[ComponentDependencies]
+Count=1
+Comp_0_Name=DynTFTKeyButton
+
+[ComponentRegistration]
+RegisterEvents=DynTFTRegisterVirtualKeyboardEvents
+GetComponentType=DynTFTGetVirtualKeyboardComponentType
