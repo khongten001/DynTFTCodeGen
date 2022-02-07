@@ -60,7 +60,7 @@ function GetConstantIntValueFromSchema(var SchemaConstants: TComponentConstantAr
 function FontPropertyValueToSFont(var AFontSettings: TFontSettingsArr; PropertyValue: string): PDynTFTFontSettings;
 procedure GetComponentIconFromImageList(ComponentIndex: Integer; AImgLst: TImageList; ASetSizeCallback: TSetSizeCallback; AStreamID: Int64);
 procedure RegisterDrawingProcedure(var ADrawingProcedures: TDrawDynTFTComponentProcArr; ADrawingProc: TDrawDynTFTComponentProc);
-procedure DrawPDynTFTComponentOnPanelBase(var APanelBase: TUIPanelBase; var ADrawingProcedures: TDrawDynTFTComponentProcArr; var APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings: TDynArrayRef);
+procedure DrawPDynTFTComponentOnPanelBase(var APanelBase: TUIPanelBase; var ADrawingProcedures: TDrawDynTFTComponentProcArr; APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings: TDynArrayRef; ASetPropertiesCallback: TSetPropertiesCallback);
 
 
 implementation
@@ -167,7 +167,7 @@ begin
 end;
 
 
-procedure DrawPDynTFTComponentOnPanelBase(var APanelBase: TUIPanelBase; var ADrawingProcedures: TDrawDynTFTComponentProcArr; var APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings: TDynArrayRef);
+procedure DrawPDynTFTComponentOnPanelBase(var APanelBase: TUIPanelBase; var ADrawingProcedures: TDrawDynTFTComponentProcArr; APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings: TDynArrayRef; ASetPropertiesCallback: TSetPropertiesCallback);
 var
   TempPropertiesOrEvents, BkpPropertiesOrEvents: TDynTFTDesignPropertyArr;
   TempSchemaConstants: TComponentConstantArr;
@@ -175,6 +175,7 @@ var
   TempFontSettings: TFontSettingsArr;
   i: Integer;
   TempStringList: TStringList;
+  TempPropertiesOrEventsRef: TDynArrayRef;
 begin
   if (APanelBase.DynTFTComponentType > -1) and (APanelBase.DynTFTComponentType < Length(ADrawingProcedures)) then
   begin
@@ -204,9 +205,13 @@ begin
       ADrawingProcedures[APanelBase.DynTFTComponentType](APanelBase, TempPropertiesOrEvents, TempSchemaConstants, TempColorConstants, TempFontSettings);
 
       //there may be components with modified properties, as a result of calls to UpdateComponentPropertyByName
-      for i := 0 to APropertiesOrEvents.Len - 1 do
-        if TempPropertiesOrEvents[i].PropertyValue <> BkpPropertiesOrEvents[i].PropertyValue then
-          TDynTFTDesignProperty(Pointer(QWord(APropertiesOrEvents.AddrOfFirst) + i * SizeOf(TDynTFTDesignProperty))^) := TempPropertiesOrEvents[i];  //in case of memory corruption (because the plugin is setting exe's array), a callback should be used
+      TempPropertiesOrEventsRef.Len := Length(TempPropertiesOrEvents);
+      if TempPropertiesOrEventsRef.Len > 0 then
+        TempPropertiesOrEventsRef.AddrOfFirst := @TempPropertiesOrEvents[0]
+      else
+        TempPropertiesOrEventsRef.AddrOfFirst := nil;
+
+      ASetPropertiesCallback(TempPropertiesOrEventsRef, APropertiesOrEvents);   // a callback is required, to do the copy operation on DynTFTCodeGen's side, because it's not safe for the plugin to overwrite strings into DynTFTCodeGen and also the temp array is cleared from memory when exiting DrawPDynTFTComponentOnPanelBase
     except
       on E: Exception do
       begin

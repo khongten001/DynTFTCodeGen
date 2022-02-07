@@ -88,9 +88,18 @@ type
     Tag: Integer;
   end;
 
+  //Pass this structure instead of  "var DynArrVar", because Delphi stores the length of array at Addr(array) - 4, while FPC stores its max index.
+  //This means that if a Delphi app passes a 3-element array to a FPC, then the FPC app thinks that it is a 4-element array.
+  TDynArrayRef = record
+    AddrOfFirst: Pointer;
+    Len: Integer;
+  end;
+
   //called by plugin, to set the destination stream size and get stream memory
   //this callback is implemented by DynTFTCodeGen
   TSetSizeCallback = function(NewSize: Int64; StreamID: Int64): Pointer;
+
+  TSetPropertiesCallback = procedure(ASrcPropertiesOrEventsRef, ADestPropertiesOrEventsRef: TDynArrayRef);     //Src is the plugin's modified content, while Dest is the initial CodeGen's array
 
   //Drawing callbacks  - called by plugins into DynTFTCodeGen, to draw DynTFT components
 
@@ -110,12 +119,7 @@ type
   TDynTFT_DrawBitmap_Callback = procedure(APointerToBmpStreamMem: Pointer; AContentSize: Int64; x, y: Integer);
 
 
-  //Pass this structure instead of  "var DynArrVar", because Delphi stores the length of array at Addr(array) - 4, while FPC stores its max index.
-  //This means that if a Delphi app passes a 3-element array to a FPC, then the FPC app thinks that it is a 4-element array.
-  TDynArrayRef = record
-    AddrOfFirst: Pointer;
-    Len: Integer;
-  end;
+  
 
   {$IFNDEF FPC}
     QWord = Int64; /////////////////////////////////////// this should also depend on Delphi version, because newer versions might know what QWord is
