@@ -89,7 +89,7 @@ type
   end;
 
   //Pass this structure instead of  "var DynArrVar", because Delphi stores the length of array at Addr(array) - 4, while FPC stores its max index.
-  //This means that if a Delphi app passes a 3-element array to a FPC, then the FPC app thinks that it is a 4-element array.
+  //This means that if a Delphi app passes a 3-element array to a FPC app, then the FPC app thinks that it is a 4-element array.
   TDynArrayRef = record
     AddrOfFirst: Pointer;
     Len: Integer;
@@ -122,8 +122,9 @@ type
   
 
   {$IFNDEF FPC}
-    QWord = Int64; /////////////////////////////////////// this should also depend on Delphi version, because newer versions might know what QWord is
-                   //anyway, QWord should be unsigned, but for D2006, this should be fine
+    {$if CompilerVersion <= 19}
+      QWord = Int64;   //anyway, QWord should be unsigned, but for D2006, this should be fine
+    {$ifend}               
   {$ENDIF}
 
 implementation
