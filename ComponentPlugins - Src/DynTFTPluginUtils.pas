@@ -59,8 +59,14 @@ procedure UpdateBaseProperties(APanelBase: TUIPanelBase; var PropertiesOrEvents:
 function GetConstantIntValueFromSchema(var SchemaConstants: TComponentConstantArr; ConstantName: string; DefaultValue: Integer): Integer;
 function FontPropertyValueToSFont(var AFontSettings: TFontSettingsArr; PropertyValue: string): PDynTFTFontSettings;
 procedure GetComponentIconFromImageList(ComponentIndex: Integer; AImgLst: TImageList; ASetSizeCallback: TSetSizeCallback; AStreamID: Int64);
-procedure RegisterDrawingProcedure(var ADrawingProcedures: TDrawDynTFTComponentProcArr; ADrawingProc: TDrawDynTFTComponentProc);
-procedure DrawPDynTFTComponentOnPanelBase(var APanelBase: TUIPanelBase; var ADrawingProcedures: TDrawDynTFTComponentProcArr; APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings: TDynArrayRef; ASetPropertiesCallback: TSetPropertiesCallback);
+procedure RegisterCompDrawingProcedure(var ACompDrawingProcedures: TDrawDynTFTComponentProcArr; ADrawingProc: TDrawDynTFTComponentProc);
+procedure DrawPDynTFTComponentOnPanelBase(var APanelBase: TUIPanelBase; var ACompDrawingProcedures: TDrawDynTFTComponentProcArr; APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings: TDynArrayRef; ASetPropertiesCallback: TSetPropertiesCallback);
+function Replace45To1310(s: string): string;
+function Replace1310To45(s: string): string;
+function Replace56To1310(s: string): string;
+function Replace1310To56(s: string): string;
+function Replace78To1310(s: string): string;
+function Replace1310To78(s: string): string;
 
 
 implementation
@@ -160,14 +166,14 @@ begin
 end;
 
 
-procedure RegisterDrawingProcedure(var ADrawingProcedures: TDrawDynTFTComponentProcArr; ADrawingProc: TDrawDynTFTComponentProc);
+procedure RegisterCompDrawingProcedure(var ACompDrawingProcedures: TDrawDynTFTComponentProcArr; ADrawingProc: TDrawDynTFTComponentProc);
 begin
-  SetLength(ADrawingProcedures, Length(ADrawingProcedures) + 1);
-  ADrawingProcedures[Length(ADrawingProcedures) - 1] := ADrawingProc;
+  SetLength(ACompDrawingProcedures, Length(ACompDrawingProcedures) + 1);
+  ACompDrawingProcedures[Length(ACompDrawingProcedures) - 1] := ADrawingProc;
 end;
 
 
-procedure DrawPDynTFTComponentOnPanelBase(var APanelBase: TUIPanelBase; var ADrawingProcedures: TDrawDynTFTComponentProcArr; APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings: TDynArrayRef; ASetPropertiesCallback: TSetPropertiesCallback);
+procedure DrawPDynTFTComponentOnPanelBase(var APanelBase: TUIPanelBase; var ACompDrawingProcedures: TDrawDynTFTComponentProcArr; APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings: TDynArrayRef; ASetPropertiesCallback: TSetPropertiesCallback);
 var
   TempPropertiesOrEvents, BkpPropertiesOrEvents: TDynTFTDesignPropertyArr;
   TempSchemaConstants: TComponentConstantArr;
@@ -177,7 +183,7 @@ var
   TempStringList: TStringList;
   TempPropertiesOrEventsRef: TDynArrayRef;
 begin
-  if (APanelBase.DynTFTComponentType > -1) and (APanelBase.DynTFTComponentType < Length(ADrawingProcedures)) then
+  if (APanelBase.DynTFTComponentType > -1) and (APanelBase.DynTFTComponentType < Length(ACompDrawingProcedures)) then
   begin
     try
       //the internal structure of dynamic arrays differs between Delphi and FreePascal  (at least the array length), so copy the contents:
@@ -202,7 +208,7 @@ begin
       for i := 0 to AFontSettings.Len - 1 do
         TempFontSettings[i] := TFontSettings(Pointer(QWord(AFontSettings.AddrOfFirst) + i * SizeOf(TFontSettings))^);
 
-      ADrawingProcedures[APanelBase.DynTFTComponentType](APanelBase, TempPropertiesOrEvents, TempSchemaConstants, TempColorConstants, TempFontSettings);
+      ACompDrawingProcedures[APanelBase.DynTFTComponentType](APanelBase, TempPropertiesOrEvents, TempSchemaConstants, TempColorConstants, TempFontSettings);
 
       //there may be components with modified properties, as a result of calls to UpdateComponentPropertyByName
       TempPropertiesOrEventsRef.Len := Length(TempPropertiesOrEvents);
@@ -215,7 +221,6 @@ begin
     except
       on E: Exception do
       begin
-        DynTFT_Set_Pen(clRed, 1);
         TempStringList := TStringList.Create;
         try
           TempStringList.Text := E.Message;
@@ -238,6 +243,108 @@ begin
     DynTFT_Write_Text('Unimplemented at index: ' + IntToStr(APanelBase.DynTFTComponentType), 5, 2);
     DynTFT_Write_Text(APanelBase.Caption, 5, 20);
   end;
+end;
+
+                                               //Do not refactor the replacement functions into a single one, because they are faster this way.
+function Replace45To1310(s: string): string;
+var
+  i: Integer;
+begin
+  Result := s;
+  if Length(Result) < 2 then
+    Exit;
+
+  for i := 1 to Length(Result) - 1 do
+    if (Result[i] = #4) and (Result[i + 1] = #5) then
+    begin
+      Result[i] := #13;
+      Result[i + 1] := #10;
+    end;
+end;
+
+
+function Replace1310To45(s: string): string;
+var
+  i: Integer;
+begin
+  Result := s;
+  if Length(Result) < 2 then
+    Exit;
+
+  for i := 1 to Length(Result) - 1 do
+    if (Result[i] = #13) and (Result[i + 1] = #10) then
+    begin
+      Result[i] := #4;
+      Result[i + 1] := #5;
+    end;
+end;
+
+
+function Replace56To1310(s: string): string;
+var
+  i: Integer;
+begin
+  Result := s;
+  if Length(Result) < 2 then
+    Exit;
+
+  for i := 1 to Length(Result) - 1 do
+    if (Result[i] = #5) and (Result[i + 1] = #6) then
+    begin
+      Result[i] := #13;
+      Result[i + 1] := #10;
+    end;
+end;
+
+
+function Replace1310To56(s: string): string;
+var
+  i: Integer;
+begin
+  Result := s;
+  if Length(Result) < 2 then
+    Exit;
+
+  for i := 1 to Length(Result) - 1 do
+    if (Result[i] = #13) and (Result[i + 1] = #10) then
+    begin
+      Result[i] := #5;
+      Result[i + 1] := #6;
+    end;
+end;
+
+
+function Replace78To1310(s: string): string;
+var
+  i: Integer;
+begin
+  Result := s;
+  if Length(Result) < 2 then
+    Exit;
+
+  for i := 1 to Length(Result) - 1 do
+    if (Result[i] = #7) and (Result[i + 1] = #8) then
+    begin
+      Result[i] := #13;
+      Result[i + 1] := #10;
+    end;
+end;
+
+
+function Replace1310To78(s: string): string;
+var
+  i: Integer;
+begin
+  Result := s;
+  if Length(Result) < 2 then
+    Exit;
+
+  for i := 1 to Length(Result) - 1 do
+    if (Result[i] = #13) and (Result[i + 1] = #10) then
+    begin
+      Result[i] := #7;
+      Result[i + 1] := #8;
+    end;
 end;
 
 end.

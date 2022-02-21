@@ -70,7 +70,7 @@ implementation
 
 
 uses
-  Windows, SysUtils{, Classes};
+  Windows, SysUtils;
 
 
 function BelongsTo(x, ALeftLimit, ARightLimit: Integer): Boolean;

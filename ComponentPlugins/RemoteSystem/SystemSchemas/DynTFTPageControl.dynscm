@@ -1,0 +1,204 @@
+[ComponentPropertiesSchema]
+Count=13
+Prop_0_Name=ActiveIndex
+Prop_0_DataType=Integer
+Prop_0_DefaultValue=-1
+Prop_0_Description=Selected page index
+Prop_0_AvailableOnCompilerDirectives=
+Prop_0_DesignTimeOnly=0
+Prop_1_Name=Items
+Prop_1_DataType=Array of String[CMaxTabButtonStringLength]
+Prop_1_DefaultValue=
+Prop_1_Description=Design-time button captions.
+Prop_1_AvailableOnCompilerDirectives=
+Prop_1_DesignTimeOnly=1
+Prop_2_Name=SelectedColor
+Prop_2_DataType=TColor
+Prop_2_DefaultValue=CL_DynTFTTabButton_SelectedBackground
+Prop_2_Description=Component color when selected
+Prop_2_AvailableOnCompilerDirectives=
+Prop_2_DesignTimeOnly=1
+Prop_3_Name=UnselectedColor
+Prop_3_DataType=TColor
+Prop_3_DefaultValue=CL_DynTFTTabButton_UnselectedBackground
+Prop_3_Description=Component color when unselected
+Prop_3_AvailableOnCompilerDirectives=
+Prop_3_DesignTimeOnly=1
+Prop_4_Name=Font_Color
+Prop_4_DataType=TColor
+Prop_4_DefaultValue=CL_DynTFTTabButton_EnabledFont
+Prop_4_Description=TabButton font color
+Prop_4_AvailableOnCompilerDirectives=
+Prop_4_DesignTimeOnly=1
+Prop_5_Name=ActiveFont
+Prop_5_DataType=PByte
+Prop_5_DefaultValue=@TFT_defaultFont
+Prop_5_Description=TabButton font
+Prop_5_AvailableOnCompilerDirectives=DynTFTFontSupport
+Prop_5_DesignTimeOnly=1
+Prop_6_Name=ButtonHeight
+Prop_6_DataType=Integer
+Prop_6_DefaultValue=30
+Prop_6_Description=TabButton height
+Prop_6_AvailableOnCompilerDirectives=
+Prop_6_DesignTimeOnly=1
+Prop_7_Name=TabArrangement
+Prop_7_DataType=String
+Prop_7_DefaultValue=CHorizontal
+Prop_7_Description=TabButton arrangement: "Horizontal" or "Vertical"
+Prop_7_AvailableOnCompilerDirectives=
+Prop_7_DesignTimeOnly=1
+Prop_8_Name=AllButtonWidths
+Prop_8_DataType=Array of Integer
+Prop_8_DefaultValue=
+Prop_8_Description=Width of every button. This property is internally computed and used at code generation, for vertical PageControls. Do not manually edit it.
+Prop_8_AvailableOnCompilerDirectives=
+Prop_8_DesignTimeOnly=1
+Prop_8_ReadOnly=1
+Prop_9_Name=MinButtonWidth
+Prop_9_DataType=Integer
+Prop_9_DefaultValue=10
+Prop_9_Description=Minimum width of every button, regardless of text width.
+Prop_9_AvailableOnCompilerDirectives=
+Prop_9_DesignTimeOnly=1
+Prop_10_Name=HorizontalTextSpacing
+Prop_10_DataType=Integer
+Prop_10_DefaultValue=0
+Prop_10_Description=Spacing between text and button edges.
+Prop_10_AvailableOnCompilerDirectives=
+Prop_10_DesignTimeOnly=1
+Prop_11_Name=PageCount
+Prop_11_DataType=Integer
+Prop_11_DefaultValue=0
+Prop_11_Description=Number of buttons. This property is internally computed and used at code generation. Do not manually edit it.
+Prop_11_AvailableOnCompilerDirectives=
+Prop_11_DesignTimeOnly=1
+Prop_11_ReadOnly=1
+Prop_12_Name=AllButtonLefts
+Prop_12_DataType=Array of Integer
+Prop_12_DefaultValue=
+Prop_12_Description=Left of every button. This property is internally computed and used at code generation, for vertical PageControls. Do not manually edit it.
+Prop_12_AvailableOnCompilerDirectives=
+Prop_12_DesignTimeOnly=1
+Prop_12_ReadOnly=1
+
+[ComponentPropertiesOverrides]
+Count=3
+Prop_0_Name=Width
+Prop_0_DefaultValue=200
+Prop_1_Name=Height
+Prop_1_DefaultValue=30
+Prop_2_Name=UseBinaryEncoding
+Prop_2_DefaultValue=False
+Prop_2_ReadOnly=1
+
+[ComponentEventsPropertiesSchema]
+Count=1
+Prop_0_Name=OnChange
+Prop_0_DataType=POnPageControlChangeEvent
+Prop_0_DefaultValue=
+Prop_0_Description=Executed on changing ItemIndex by pressing a different button.
+Prop_0_AvailableOnCompilerDirectives=
+Prop_0_DesignTimeOnly=0
+Prop_0_DataTypeDefinition=procedure _<HandlerName>_(Sender: PPtrRec);
+
+[ComponentEventsOverrides]
+Count=0
+
+[Constants]
+Count=4
+Const_0_Name=CMaxTabButtonStringLength
+Const_0_DataType=Integer
+Const_0_Value=19
+Const_1_Name=CMaxPageControlPageCount
+Const_1_DataType=Integer
+Const_1_Value=20
+Const_2_Name=CHorizontal
+Const_2_DataType=String
+Const_2_Value=Horizontal
+Const_3_Name=CVertical
+Const_3_DataType=String
+Const_3_Value=Vertical
+
+[ColorConstants]
+Count=3
+Const_0_Name=CL_DynTFTTabButton_SelectedBackground
+Const_0_DataType=TColor
+Const_0_Value=CL_WHITE
+Const_1_Name=CL_DynTFTTabButton_UnselectedBackground
+Const_1_DataType=TColor
+Const_1_Value=CL_LIGHTBLUE
+Const_2_Name=CL_DynTFTTabButton_EnabledFont
+Const_2_DataType=TColor
+Const_2_Value=CL_BLACK
+
+[OneTimeComponentInitCode_Interface]
+Count=8
+Line_0=//PageControl code
+Line_1=type
+Line_2=TTabButtonCaption = string[CMaxTabButtonStringLength];
+Line_3=TTabButtonCaptionArr = array{$IFDEF IsMCU}[0..0]{$ENDIF} of TTabButtonCaption;
+Line_4=TTabButtonIntegerArr = array{$IFDEF IsMCU}[0..0]{$ENDIF} of Integer;
+Line_5=
+Line_6=procedure PDynTFTPageControl_CreateAllTabButtonsAsHorizontal(Left, Top, Height, PageCount: Integer; {$IFDEF IsMCU}var Lefts, Widths: TTabButtonIntegerArr {$ELSE} const Lefts, Widths: array of Integer{$ENDIF}; Parent: PDynTFTPageControl; {$IFDEF IsMCU}var Captions: TTabButtonCaptionArr{$ELSE} const Captions: array of TTabButtonCaption{$ENDIF});
+Line_7=procedure PDynTFTPageControl_CreateAllTabButtonsAsVertical(Left, Top, Width, Height, PageCount: Integer; Parent: PDynTFTPageControl; {$IFDEF IsMCU}var Captions: TTabButtonCaptionArr{$ELSE} const Captions: array of TTabButtonCaption{$ENDIF});
+
+[OneTimeComponentInitCode_Implementation]
+Count=27
+Line_0=procedure PDynTFTPageControl_CreateTabButton(Left, Top, Width, Height: Integer; {$IFDEF IsMCU} var {$ENDIF}Caption: string; Parent: PDynTFTPageControl);
+Line_1=var
+Line_2=tabbtn: PDynTFTTabButton;
+Line_3=begin
+Line_4=tabbtn := DynTFTTabButton_Create(Parent^.BaseProps.ScreenIndex, Left, Top, Width, Height);
+Line_5=tabbtn^.Caption := Caption;
+Line_6=DynTFTAddTabButtonToPageControl(Parent, tabbtn);
+Line_7=end;
+Line_8=
+Line_9=procedure PDynTFTPageControl_CreateAllTabButtonsAsHorizontal(Left, Top, Height, PageCount: Integer; {$IFDEF IsMCU}var Lefts, Widths: TTabButtonIntegerArr {$ELSE} const Lefts, Widths: array of Integer{$ENDIF}; Parent: PDynTFTPageControl; {$IFDEF IsMCU}var Captions: TTabButtonCaptionArr{$ELSE} const Captions: array of TTabButtonCaption{$ENDIF});
+Line_10=var
+Line_11=i, ButtonCount_1: Integer;
+Line_12=begin
+Line_13=ButtonCount_1 := PageCount - 1;
+Line_14=for i := 0 to ButtonCount_1 do
+Line_16=PDynTFTPageControl_CreateTabButton(Left + Lefts[i], Top, Widths[i], Height, Captions[i], Parent);
+Line_17=end;
+Line_18=
+Line_19=procedure PDynTFTPageControl_CreateAllTabButtonsAsVertical(Left, Top, Width, Height, PageCount: Integer; Parent: PDynTFTPageControl; {$IFDEF IsMCU}var Captions: TTabButtonCaptionArr{$ELSE} const Captions: array of TTabButtonCaption{$ENDIF});
+Line_20=var
+Line_21=i, ButtonCount_1: Integer;
+Line_22=begin
+Line_23=ButtonCount_1 := PageCount - 1;
+Line_24=for i := 0 to ButtonCount_1 do
+Line_25=PDynTFTPageControl_CreateTabButton(Left, Top + i * Height, Width, Height, Captions[i], Parent);
+Line_26=end;
+
+[PerInstanceInitConstants]
+Count=3
+Line_0=C_<NoString_ObjectName>__Captions: array[0.._<Length(Items)>_ - 1] of TTabButtonCaption = (_<CSV(Items)>_);
+Line_1=C_<NoString_ObjectName>__ButtonLefts: array[0.._<Length(Items)>_ - 1] of Integer = (_<CSV(AllButtonLefts)>_);
+Line_2=C_<NoString_ObjectName>__ButtonWidths: array[0.._<Length(Items)>_ - 1] of Integer = (_<CSV(AllButtonWidths)>_);
+
+[PerInstanceInitCode]
+Count=10
+Line_0={$DEFINE _<NoString_ObjectName>___<NoString_TabArrangement>_}
+Line_1={$IFDEF _<NoString_ObjectName>__CVertical}
+Line_2=PDynTFTPageControl_CreateAllTabButtonsAsVertical(_<Left>_, _<Top>_, _<Width>_, _<ButtonHeight>_, _<PageCount>_, _<NoString_LocalObjectName>_, C_<NoString_ObjectName>__Captions);
+Line_3={$ELSE}
+Line_4=PDynTFTPageControl_CreateAllTabButtonsAsHorizontal(_<Left>_, _<Top>_, _<Height>_, _<PageCount>_, C_<NoString_ObjectName>__ButtonLefts, C_<NoString_ObjectName>__ButtonWidths, _<NoString_LocalObjectName>_, C_<NoString_ObjectName>__Captions);
+Line_5={$ENDIF}
+Line_6={$DEFINE _<NoString_ObjectName>__Enabled__<Enabled>_}
+Line_7={$IFDEF _<NoString_ObjectName>__Enabled_0}
+Line_8=DynTFTDisablePageControl(_<NoString_ObjectName>_);
+Line_9={$ENDIF}
+
+[CreateComponentCode]
+Count=1
+Line_0=_<ObjectName>_ := DynTFTPageControl_Create(_<ScreenIndex>_, _<Left>_, _<Top>_, _<Width>_, _<Height>_);
+
+[ComponentDependencies]
+Count=1
+Comp_0_Name=DynTFTTabButton
+
+[ComponentRegistration]
+RegisterEvents=DynTFTRegisterPageControlEvents
+GetComponentType=DynTFTGetPageControlComponentType

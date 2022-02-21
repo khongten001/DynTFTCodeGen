@@ -1,0 +1,167 @@
+[ComponentPropertiesSchema]
+Count=11
+Prop_0_Name=Caption
+Prop_0_DataType=String[CMaxRadioGroupStringLength]
+Prop_0_DefaultValue=
+Prop_0_Description=This is the displayed caption.
+Prop_0_AvailableOnCompilerDirectives=
+Prop_0_DesignTimeOnly=0
+Prop_1_Name=Color
+Prop_1_DataType=TColor
+Prop_1_DefaultValue=CL_DynTFTRadioGroup_Background
+Prop_1_Description=Component color
+Prop_1_AvailableOnCompilerDirectives=
+Prop_1_DesignTimeOnly=0
+Prop_2_Name=Font_Color
+Prop_2_DataType=TColor
+Prop_2_DefaultValue=CL_DynTFTRadioGroup_EnabledFont
+Prop_2_Description=Component font color
+Prop_2_AvailableOnCompilerDirectives=
+Prop_2_DesignTimeOnly=0
+Prop_3_Name=ActiveFont
+Prop_3_DataType=PByte
+Prop_3_DefaultValue=@TFT_defaultFont
+Prop_3_Description=Component font
+Prop_3_AvailableOnCompilerDirectives=DynTFTFontSupport
+Prop_3_DesignTimeOnly=0
+Prop_4_Name=ItemIndex
+Prop_4_DataType=Integer
+Prop_4_DefaultValue=-1
+Prop_4_Description=Button selected index
+Prop_4_AvailableOnCompilerDirectives=
+Prop_4_DesignTimeOnly=0
+Prop_5_Name=Items
+Prop_5_DataType=Array of String[CMaxRadioButtonStringLength]
+Prop_5_DefaultValue=
+Prop_5_Description=Design-time button captions.
+Prop_5_AvailableOnCompilerDirectives=
+Prop_5_DesignTimeOnly=1
+Prop_6_Name=ButtonIndent
+Prop_6_DataType=Integer
+Prop_6_DefaultValue=5
+Prop_6_Description=Spacing between the left side of a button and left side of the radio group
+Prop_6_AvailableOnCompilerDirectives=
+Prop_6_DesignTimeOnly=1
+Prop_7_Name=MinButtonHeight
+Prop_7_DataType=Integer
+Prop_7_DefaultValue=15
+Prop_7_Description=Vertical spacing between buttons, only if greater than text height
+Prop_7_AvailableOnCompilerDirectives=
+Prop_7_DesignTimeOnly=1
+Prop_8_Name=ItemHeight
+Prop_8_DataType=Integer
+Prop_8_DefaultValue=15
+Prop_8_Description=Height of an item. This property is internally computed and used at code generation. Do not manually edit it.
+Prop_8_AvailableOnCompilerDirectives=
+Prop_8_DesignTimeOnly=1
+Prop_8_ReadOnly=1
+Prop_9_Name=ButtonYOffset
+Prop_9_DataType=Integer
+Prop_9_DefaultValue=15
+Prop_9_Description=Additional spacing between RadioGroup caption and first button.
+Prop_9_AvailableOnCompilerDirectives=
+Prop_9_DesignTimeOnly=1
+Prop_10_Name=ButtonCount
+Prop_10_DataType=Integer
+Prop_10_DefaultValue=0
+Prop_10_Description=Number of buttons. This property is internally computed and used at code generation. Do not manually edit it.
+Prop_10_AvailableOnCompilerDirectives=
+Prop_10_DesignTimeOnly=1
+Prop_10_ReadOnly=1
+
+[ComponentPropertiesOverrides]
+Count=3
+Prop_0_Name=Width
+Prop_0_DefaultValue=200
+Prop_1_Name=Height
+Prop_1_DefaultValue=100
+Prop_2_Name=UseBinaryEncoding
+Prop_2_DefaultValue=False
+Prop_2_ReadOnly=1
+
+[ComponentEventsPropertiesSchema]
+Count=1
+Prop_0_Name=OnSelectionChanged
+Prop_0_DataType=POnRadioGroupSelectionChangedEvent
+Prop_0_DefaultValue=
+Prop_0_Description=Executed on changing ItemIndex by selecting a different button.
+Prop_0_AvailableOnCompilerDirectives=
+Prop_0_DesignTimeOnly=0
+Prop_0_DataTypeDefinition=procedure _<HandlerName>_(Sender: PPtrRec);
+
+[ComponentEventsOverrides]
+Count=0
+
+[Constants]
+Count=3
+Const_0_Name=CMaxRadioGroupStringLength
+Const_0_DataType=Integer
+Const_0_Value=19
+Const_1_Name=CMaxRadioGroupButtonCount
+Const_1_DataType=Integer
+Const_1_Value=20
+Const_2_Name=CMaxRadioButtonStringLength
+Const_2_DataType=Integer
+Const_2_Value=19
+
+[ColorConstants]
+Count=2
+Const_0_Name=CL_DynTFTRadioGroup_Background
+Const_0_DataType=TColor
+Const_0_Value=CL_LIGHTBLUE
+Const_1_Name=CL_DynTFTRadioGroup_EnabledFont
+Const_1_DataType=TColor
+Const_1_Value=CL_BLACK
+
+[OneTimeComponentInitCode_Interface]
+Count=6
+Line_0=//RadioGroup code
+Line_1=type
+Line_2=TRadioButtonCaption = string[CMaxRadioButtonStringLength];
+Line_3=TRadioButtonCaptionArr = array{$IFDEF IsMCU}[0..0]{$ENDIF} of TRadioButtonCaption;
+Line_4=
+Line_5=procedure PDynTFTRadioGroup_CreateAllRadioButtons(Left, Top, Width, Height, ButtonCount: Integer; Parent: PDynTFTRadioGroup; {$IFDEF IsMCU}var Captions: TRadioButtonCaptionArr{$ELSE} const Captions: array of TRadioButtonCaption{$ENDIF});
+
+[OneTimeComponentInitCode_Implementation]
+Count=17
+Line_0=procedure PDynTFTRadioGroup_CreateRadioButton(Left, Top, Width, Height: Integer; {$IFDEF IsMCU} var {$ENDIF}Caption: string; Parent: PDynTFTRadioGroup);
+Line_1=var
+Line_2=radbtn: PDynTFTRadioButton;
+Line_3=begin
+Line_4=radbtn := DynTFTRadioButton_Create(Parent^.BaseProps.ScreenIndex, Left, Top, Width, Height);
+Line_5=radbtn^.Caption := Caption;
+Line_6=DynTFTAddRadioButtonToRadioGroup(Parent, radbtn);
+Line_7=end;
+Line_8=
+Line_9=procedure PDynTFTRadioGroup_CreateAllRadioButtons(Left, Top, Width, Height, ButtonCount: Integer; Parent: PDynTFTRadioGroup; {$IFDEF IsMCU}var Captions: TRadioButtonCaptionArr{$ELSE} const Captions: array of TRadioButtonCaption{$ENDIF});
+Line_10=var
+Line_11=i, ButtonCount_1: Integer;
+Line_12=begin
+Line_13=ButtonCount_1 := ButtonCount - 1;
+Line_14=for i := 0 to ButtonCount_1 do
+Line_15=PDynTFTRadioGroup_CreateRadioButton(Left, Top + i * Height, Width, Height, Captions[i], Parent);
+Line_16=end;
+
+[PerInstanceInitConstants]
+Count=1
+Line_0=C_<NoString_ObjectName>__Captions: array[0.._<Length(Items)>_ - 1] of TRadioButtonCaption = (_<CSV(Items)>_);
+
+[PerInstanceInitCode]
+Count=5
+Line_0=PDynTFTRadioGroup_CreateAllRadioButtons(_<Left>_ + _<ButtonIndent>_, _<Top>_ + _<ItemHeight>_ + _<ButtonYOffset>_ - 1, _<Width>_ - _<ButtonIndent>_ - 6, _<ItemHeight>_, _<ButtonCount>_, _<NoString_LocalObjectName>_, C_<NoString_ObjectName>__Captions);
+Line_1={$DEFINE _<NoString_ObjectName>__Enabled__<Enabled>_}
+Line_2={$IFDEF _<NoString_ObjectName>__Enabled_0}
+Line_3=DynTFTDisableRadioGroup(_<NoString_ObjectName>_);
+Line_4={$ENDIF}
+
+[CreateComponentCode]
+Count=1
+Line_0=_<ObjectName>_ := DynTFTRadioGroup_Create(_<ScreenIndex>_, _<Left>_, _<Top>_, _<Width>_, _<Height>_);
+
+[ComponentDependencies]
+Count=1
+Comp_0_Name=DynTFTRadioButton
+
+[ComponentRegistration]
+RegisterEvents=DynTFTRegisterRadioGroupEvents
+GetComponentType=DynTFTGetRadioGroupComponentType

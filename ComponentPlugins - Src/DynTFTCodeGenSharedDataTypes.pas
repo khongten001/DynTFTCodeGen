@@ -41,7 +41,7 @@ unit DynTFTCodeGenSharedDataTypes;
 interface
 
 uses
-  Windows, Graphics, TFT;
+  Graphics, TFT;
 
 type
   TColorConst = record
@@ -83,7 +83,6 @@ type
 
   TUIPanelBase = record
     Width, Height, DynTFTComponentType: Integer;
-    CanvasHandle: HDC;
     Caption: string;
     Tag: Integer;
   end;
@@ -97,26 +96,26 @@ type
 
   //called by plugin, to set the destination stream size and get stream memory
   //this callback is implemented by DynTFTCodeGen
-  TSetSizeCallback = function(NewSize: Int64; StreamID: Int64): Pointer;
+  TSetSizeCallback = function(NewSize: Int64; StreamID: Int64): Pointer; register;
 
-  TSetPropertiesCallback = procedure(ASrcPropertiesOrEventsRef, ADestPropertiesOrEventsRef: TDynArrayRef);     //Src is the plugin's modified content, while Dest is the initial CodeGen's array
+  TSetPropertiesCallback = procedure(ASrcPropertiesOrEventsRef, ADestPropertiesOrEventsRef: TDynArrayRef); register;    //Src is the plugin's modified content, while Dest is the initial CodeGen's array
 
   //Drawing callbacks  - called by plugins into DynTFTCodeGen, to draw DynTFT components
 
-  //TDynTFT_Init_Callback = procedure(display_width, display_height: Word);
-  TDynTFT_Set_Pen_Callback = procedure(pen_color: TColor; pen_width: Byte);
-  TDynTFT_Set_Brush_Callback = procedure(brush_enabled: Byte; brush_color: TColor; gradient_enabled, gradient_orientation: Byte; gradient_color_from, gradient_color_to: TColor);
-  TDynTFT_Set_Font_Callback = procedure(activeFont: PByte; font_color: TColor; font_orientation: Word);
-  TDynTFT_Write_Text_Callback = procedure(AText: string; x, y: Word);
-  TDynTFT_Line_Callback = procedure(x1, y1, x2, y2: Integer);
-  TDynTFT_H_Line_Callback = procedure(x_start, x_end, y_pos: Integer);
-  TDynTFT_V_Line_Callback = procedure(y_start, y_end, x_pos: Integer);
-  TDynTFT_Dot_Callback = procedure(x, y: Integer; Color: TColor);
-  TDynTFT_Fill_Screen_Callback = procedure(color: TColor);
-  TDynTFT_Rectangle_Callback = procedure(x_upper_left, y_upper_left, x_bottom_right, y_bottom_right: Integer);
-  TDynTFT_Circle_Callback = procedure(x_center, y_center, radius: Integer);
-  TDynTFT_GetTextWidthAndHeight_Callback = procedure(AText: string; var Width, Height: Word);
-  TDynTFT_DrawBitmap_Callback = procedure(APointerToBmpStreamMem: Pointer; AContentSize: Int64; x, y: Integer);
+  //TDynTFT_Init_Callback = procedure(display_width, display_height: Word); register;
+  TDynTFT_Set_Pen_Callback = procedure(pen_color: TColor; pen_width: Byte); register;
+  TDynTFT_Set_Brush_Callback = procedure(brush_enabled: Byte; brush_color: TColor; gradient_enabled, gradient_orientation: Byte; gradient_color_from, gradient_color_to: TColor); register;
+  TDynTFT_Set_Font_Callback = procedure(activeFont: PByte; font_color: TColor; font_orientation: Word); register;
+  TDynTFT_Write_Text_Callback = procedure(AText: string; x, y: Word); register;
+  TDynTFT_Line_Callback = procedure(x1, y1, x2, y2: Integer); register;
+  TDynTFT_H_Line_Callback = procedure(x_start, x_end, y_pos: Integer); register;
+  TDynTFT_V_Line_Callback = procedure(y_start, y_end, x_pos: Integer); register;
+  TDynTFT_Dot_Callback = procedure(x, y: Integer; Color: TColor); register;
+  TDynTFT_Fill_Screen_Callback = procedure(color: TColor); register;
+  TDynTFT_Rectangle_Callback = procedure(x_upper_left, y_upper_left, x_bottom_right, y_bottom_right: Integer); register;
+  TDynTFT_Circle_Callback = procedure(x_center, y_center, radius: Integer); register;
+  TDynTFT_GetTextWidthAndHeight_Callback = procedure(AText: string; var Width, Height: Word); register;
+  TDynTFT_DrawBitmap_Callback = procedure(APointerToBmpStreamMem: Pointer; AContentSize: Int64; x, y: Integer); register;
 
 
   

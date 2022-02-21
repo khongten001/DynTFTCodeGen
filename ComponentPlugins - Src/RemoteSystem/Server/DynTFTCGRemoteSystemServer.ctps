@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="DynTFTCGRemoteSystemServer.ppr"/>
+        <FRMtype Value="0"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <CursorPos X="3" Y="24"/>
+        <UsageCount Value="34"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <FRMtype Value="200"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmDynTFTCGRemoteSystemServerMain"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="0"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="116"/>
+        <CursorPos X="40" Y="123"/>
+        <UsageCount Value="34"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\RemoteSystemCommands.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="4"/>
+        <WindowIndex Value="0"/>
+        <CursorPos X="36" Y="9"/>
+        <UsageCount Value="32"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\DynTFTPluginUtils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="3"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="128"/>
+        <CursorPos X="40" Y="132"/>
+        <UsageCount Value="31"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\SystemFP\ComponentIcons.pas"/>
+        <FRMtype Value="300"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="dmIcons"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="DataModule"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="30"/>
+        <CursorPos X="20" Y="39"/>
+        <UsageCount Value="31"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\DynTFT\TFT.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="30"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\System\PanelDrawing.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="55"/>
+        <CursorPos X="36" Y="71"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="C:\codetyphon\typhon\components\pl_Indy\source\IdTCPConnection.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="427"/>
+        <CursorPos X="14" Y="444"/>
+        <UsageCount Value="9"/>
+      </Unit>
+      <Unit>
+        <Filename Value="C:\codetyphon\typhon\components\pl_Indy\source\IdIOHandlerSocket.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="127"/>
+        <CursorPos X="23" Y="139"/>
+        <UsageCount Value="8"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\DynTFTCodeGenSharedDataTypes.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="97"/>
+        <CursorPos X="30" Y="46"/>
+        <UsageCount Value="15"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\DynTFT\DynTFTConsts.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="119"/>
+        <CursorPos X="30" Y="133"/>
+        <UsageCount Value="12"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="DynTFTColorTheme.inc"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="43"/>
+        <CursorPos X="30" Y="56"/>
+        <UsageCount Value="12"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="PanelDrawing.pas"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <CursorPos X="3" Y="17"/>
+        <UsageCount Value="21"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\DynTFTCodeGenImgForm.pas"/>
+        <FRMtype Value="0"/>
+        <ComponentName Value="frmImg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <CursorPos X="8" Y="13"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\PanelDrawing.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="69"/>
+        <CursorPos X="11" Y="46"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\DynTFT\DynTFTButton.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="310"/>
+        <CursorPos X="32" Y="318"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="D:\DynTFT\DynTFTUtils.pas"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="569"/>
+        <CursorPos X="18" Y="535"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\SystemFP\DynTFTCodeGenImgForm.pas"/>
+        <FRMtype Value="200"/>
+        <ComponentName Value="frmImg"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\System\DynTFTCodeGenImgForm.pas"/>
+        <FRMtype Value="0"/>
+        <ComponentName Value="frmImg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="37"/>
+        <CursorPos X="3" Y="59"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\System\DynTFTCodeGenImgForm.dfm"/>
+        <FRMtype Value="0"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="851"/>
+        <CursorPos X="131" Y="852"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="FRM"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\SystemFP\DynTFTCodeGenImgFormFP.pas"/>
+        <FRMtype Value="200"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmImg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="44"/>
+        <CursorPos X="35" Y="69"/>
+        <UsageCount Value="24"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+    </Units>
+    <JumpHistory HistoryIndex="28">
+      <Position>
+        <Filename Value="..\..\DynTFTPluginUtils.pas"/>
+        <Caret Line="61" Column="40" TopLine="46"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="76" Column="33" TopLine="54"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="64" Column="53" TopLine="47"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="76" Column="33" TopLine="59"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\DynTFTPluginUtils.pas"/>
+        <Caret Line="132" Column="40" TopLine="113"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="44" Column="77" TopLine="23"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\DynTFTCodeGenSharedDataTypes.pas"/>
+        <Caret Line="44" Column="22" TopLine="27"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="76" Column="33" TopLine="61"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="79" Column="17" TopLine="58"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="82" Column="30" TopLine="59"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\DynTFTPluginUtils.pas"/>
+        <Caret Line="61" Column="40" TopLine="44"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="87" Column="19" TopLine="65"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="144" Column="33" TopLine="123"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="91" Column="19" TopLine="64"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="87" Column="49" TopLine="80"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="106" Column="43" TopLine="82"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="143" Column="50" TopLine="118"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="151" Column="32" TopLine="131"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\System\PanelDrawing.pas"/>
+        <Caret Line="112" Column="48" TopLine="100"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\System\PanelDrawing.pas"/>
+        <Caret Line="114" Column="39" TopLine="101"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\System\PanelDrawing.pas"/>
+        <Caret Line="941" Column="13" TopLine="928"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\DynTFTPluginUtils.pas"/>
+        <Caret Line="132" Column="40" TopLine="131"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\System\PanelDrawing.pas"/>
+        <Caret Line="941" Column="16" TopLine="924"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\System\PanelDrawing.pas"/>
+        <Caret Line="941" Column="18" TopLine="918"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="151" Column="32" TopLine="88"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\System\PanelDrawing.pas"/>
+        <Caret Line="36" Column="48" TopLine="22"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="139" Column="5" TopLine="125"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="145" Column="138" TopLine="123"/>
+      </Position>
+      <Position>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="122" Column="38" TopLine="101"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>
