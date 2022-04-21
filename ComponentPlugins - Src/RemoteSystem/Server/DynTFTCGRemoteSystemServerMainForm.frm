@@ -24,6 +24,7 @@ object frmDynTFTCGRemoteSystemServerMain: TfrmDynTFTCGRemoteSystemServerMain
     Bindings = <>
     DefaultPort = 3580
     MaxConnections = 1
+    ReuseSocket = rsTrue
     OnExecute = IdTCPServer1Execute
     Left = 61
     Top = 53
@@ -33,6 +34,20 @@ object frmDynTFTCGRemoteSystemServerMain: TfrmDynTFTCGRemoteSystemServerMain
     Interval = 10
     OnTimer = tmrStartupTimer
     Left = 142
+    Top = 53
+  end
+  object tmrPrepareClient: TTimer
+    Enabled = False
+    Interval = 1
+    OnTimer = tmrPrepareClientTimer
+    Left = 240
+    Top = 53
+  end
+  object tmrCloseClient: TTimer
+    Enabled = False
+    Interval = 1
+    OnTimer = tmrCloseClientTimer
+    Left = 344
     Top = 53
   end
 end

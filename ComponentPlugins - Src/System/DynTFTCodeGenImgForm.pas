@@ -60,7 +60,7 @@ var
 
 implementation
 
-{$R *.dfm}
+{$R *.dfm}         //This is the Delphi version of the form. It should not be compiled with FreePascal. There is DynTFTCodeGenImgFormFP for that.
 
 procedure TfrmImg.FormClose(Sender: TObject; var Action: TCloseAction);
 begin

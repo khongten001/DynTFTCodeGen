@@ -46,6 +46,7 @@ uses
   Classes,
   Graphics,
   Forms,
+  DynTFTCodeGenImgFormFP,
   ComponentIcons,
   PanelDrawing,
   DynTFTCodeGenSharedDataTypes,

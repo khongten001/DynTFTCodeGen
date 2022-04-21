@@ -40,23 +40,21 @@ unit RSPanelDrawing;
 
 {ToDo
 
-- Fix various synchronizations inssues (client-server race conditions)
+[in work] - Fix various synchronizations inssues (client-server race conditions)
   - includes drawing a component over another (because there is no synchronization between draing components and drawing primitives)
 - Implement modifying properties by plugin  (requires the server to implement sending back the list of properties)
   This is needed to properly generate code for components like Items, ListBox, RadioGroup, PageControl.
-- Implement color theme preview using UpdateLiveColorConstants
-- Implement a timer for verifying (pinging) server connection and automatically reconnect if disconnected
+[in work] - Implement a timer for verifying (pinging) server connection and automatically reconnect if disconnected
 - Optimize the client-server API to send as less redundant data as possible. For example, color constants might be sent once.
   This optimization makes sense when refreshing multiple components in one action.
-  - Properties are converted to string using IntToStr. These should be replaced with IntToHex.
-- Fix custom font implementation.  Font color does not work.
+  [partially done] - Properties are converted to string using IntToStr. These should be replaced with IntToHex.
 - Tweak timeouts, to improve speed.
 }
 
 interface
 
 uses
-  Windows, SysUtils, Classes, DynTFTCodeGenSharedDataTypes;
+  Windows, SysUtils, Classes, DynTFTCodeGenSharedDataTypes, ExtCtrls, IdTCPServer;
 
 procedure RegisterAllComponentsEvents; stdcall;
 procedure DrawPDynTFTComponentOnPanel(var APanelBase: TUIPanelBase; APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings: TDynArrayRef; ASetPropertiesCallback: TSetPropertiesCallback); stdcall;
@@ -80,13 +78,24 @@ procedure RegisterDynTFTDrawingProcedures(
 procedure CreateCallbackTCPServer;
 procedure DestroyCallbackTCPServer;
 
+procedure CreateConnectionTimer;
+procedure DestroyConnectionTimer;
+procedure DisplayConnectionStatus(AIsConnected: Boolean);
+
+
+var
+  FIdTCPServer: TIdTCPServer;
+
+
 implementation
 
 
 uses
   DynTFTCGRemoteSystemExportedFunctions, RemoteSystemCommands, DynTFTPluginUtils,
   TFTCallbacks, DynTFTUtils, Graphics, DynTFTSharedUtils, DynTFTCodeGenImgFormRS,
-  IdTCPServer, IdSync, IdCustomTCPServer, IdContext, IdIOHandlerSocket, IdException;
+  IdSync, IdCustomTCPServer, IdContext, IdIOHandlerSocket, IdException,
+  IdGlobal
+  ;
 
 type
   TSyncLogObj = class(TIdSync)
@@ -112,7 +121,7 @@ type
 
 var
   FDrawingProcedures: TDrawDynTFTComponentProcArr;
-  FIdTCPServer: TIdTCPServer;
+  FtmrCheckConnection: TTimer;
 
 
 procedure TSyncLogObj.DoSynchronize;
@@ -214,13 +223,13 @@ begin
                        IntToHex(Int64(AFontSettings[i].SFont), 8) + CRecFieldSeparator +  // font address
                        AFontSettings[i].SFont.FontName + CRecFieldSeparator +
                        AFontSettings[i].SFont.IdentifierName + CRecFieldSeparator +
-                       IntToStr(AFontSettings[i].SFont.FontSize) + CRecFieldSeparator +
-                       IntToStr(Ord(AFontSettings[i].SFont.Bold)) + CRecFieldSeparator +
-                       IntToStr(Ord(AFontSettings[i].SFont.Italic)) + CRecFieldSeparator +
-                       IntToStr(Ord(AFontSettings[i].SFont.Underline)) + CRecFieldSeparator +
-                       IntToStr(Ord(AFontSettings[i].SFont.StrikeOut)) + CRecFieldSeparator +
-                       IntToStr(AFontSettings[i].SFont.Charset) + CRecFieldSeparator +
-                       IntToStr(Ord(AFontSettings[i].SFont.Pitch)) + CRecFieldArrayItemSeparator;
+                       IntToHex(AFontSettings[i].SFont.FontSize, 2) + CRecFieldSeparator +
+                       IntToHex(Ord(AFontSettings[i].SFont.Bold), 1) + CRecFieldSeparator +
+                       IntToHex(Ord(AFontSettings[i].SFont.Italic), 1) + CRecFieldSeparator +
+                       IntToHex(Ord(AFontSettings[i].SFont.Underline), 1) + CRecFieldSeparator +
+                       IntToHex(Ord(AFontSettings[i].SFont.StrikeOut), 1) + CRecFieldSeparator +
+                       IntToHex(AFontSettings[i].SFont.Charset, 2) + CRecFieldSeparator +
+                       IntToHex(Ord(AFontSettings[i].SFont.Pitch), 1) + CRecFieldArrayItemSeparator;
 
 end;
 
@@ -311,7 +320,7 @@ begin
     else
       activeFont := PByte(HexToInt(FontAddress));
 
-    font_color := HexToInt(AStringList.Values['gradient_color_from']);
+    font_color := HexToInt(AStringList.Values['font_color']);
     font_orientation := HexToInt(AStringList.Values['font_orientation']);
 
     FDynTFT_Set_Font_Callback(activeFont, font_color, font_orientation);
@@ -486,7 +495,16 @@ begin
     AStringList.Text := CmdParam;
     AText := AStringList.Values['AText'];              //AddToLogFromThread('Do_GetTextWidthAndHeight_Callback: ' + AText);
 
-    FGetTextWidthAndHeight_Callback(AText, Width, Height);
+    try
+      FGetTextWidthAndHeight_Callback(AText, Width, Height);
+    except
+      on E: Exception do
+      begin
+        AddToLogFromThread('Do_GetTextWidthAndHeight_Callback: ' + E.Message);
+        frmImg.Show;
+      end;
+    end;
+
     ASocket.WriteLn('Width=' + IntToHex(Width, 4) + #4#5 + 'Height=' + IntToHex(Height, 4));
   finally
     AStringList.Free;
@@ -585,6 +603,7 @@ type
   TServerHandlers = class
   private
     procedure IdTCPServerExecute(AContext: TIdContext);
+    procedure FtmrCheckConnectionTimer(Sender: TObject);
   end;
 
 var
@@ -596,17 +615,55 @@ begin
   FServerHandlers := TServerHandlers.Create;
   FIdTCPServer := TIdTCPServer.Create(nil);
   FIdTCPServer.OnExecute := FServerHandlers.IdTCPServerExecute;
-  FIdTCPServer.DefaultPort := 3581;
+  FIdTCPServer.DefaultPort := FPluginServerPort;
+  FIdTCPServer.ReuseSocket := rsTrue;
+  FIdTCPServer.MaxConnections := 10;
   FIdTCPServer.Active := True;
+  DynTFT_DebugConsole('Listening on port ' + IntToStr(FIdTCPServer.DefaultPort) + '.');
 end;
 
 
 procedure DestroyCallbackTCPServer;
 begin
+  FIdTCPServer.StopListening;
   FIdTCPServer.Active := False;
   FreeAndNil(FIdTCPServer);
   FreeAndNil(FServerHandlers);
 end;
+
+                                            
+procedure CreateConnectionTimer;
+begin
+  FtmrCheckConnection := TTimer.Create(nil);
+  FtmrCheckConnection.Interval := 2000;
+  FtmrCheckConnection.OnTimer := FServerHandlers.FtmrCheckConnectionTimer;
+  FtmrCheckConnection.Enabled := True;
+end;
+
+
+procedure DestroyConnectionTimer;
+begin
+  FtmrCheckConnection.Free;
+end;
+
+
+procedure DisplayConnectionStatus(AIsConnected: Boolean);
+const
+  CDisplayStatus: array[Boolean] of string = (' Status: Not connected to RS server', ' Status: Connected to RS server');
+begin
+  frmImg.pnlStatus.Caption := CDisplayStatus[AIsConnected];
+
+  if AIsConnected then
+    frmImg.pnlStatus.Font.Color := clGreen
+  else
+    frmImg.pnlStatus.Font.Color := clMaroon;
+end;
+
+
+const
+  CDrawingCmdTimeout = 2000;
+  CMaxLineLen = 131072;         //Please increase this value, if a project with multiple components displays "Max line length exceeded."
+
 
 
 procedure TServerHandlers.IdTCPServerExecute(AContext: TIdContext);
@@ -614,7 +671,7 @@ var
   Cmd, CmdParam: string;
 begin
   try
-    Cmd := AContext.Connection.Socket.ReadLn(#13#10, 20);
+    Cmd := AContext.Connection.Socket.ReadLn(#13#10, CDrawingCmdTimeout, CMaxLineLen);
     CmdParam := Copy(Cmd, Pos('=', Cmd) + 1, MaxInt);
     Cmd := Copy(Cmd, 1, Pos('=', Cmd) - 1);
 
@@ -623,13 +680,20 @@ begin
       //DynTFT_DebugConsole('Received empty drawing command.  Cmd = ' + Cmd);
       Exit;
     end;
-                                             
-    if Cmd = CCGRM_CallbackDraw then
+
+    if Cmd = CCGRM_CallbackDraw then  //used for drawing bitmaps
     begin
       //SyncThreadToUI; //not as effective as DynTFT_DebugConsole, which writes to a TMemo
       DynTFT_DebugConsole('CCGRM_CallbackDraw...'); //required, to avoid "Out of system resources." error message.   ToDo: fix this.
       //DynTFT_DebugConsole('CCGRM_CallbackDraw... CmdParam = ' + CmdParam);
       ReadDrawingCommands{FromThread}(AContext.Connection.Socket, CmdParam);    ///////////// if synchronizing using "FromThread", it seems the race condition is less likely to reproduce, but the CDPDynTFT_GetTextWidthAndHeight callback is not called when needed, because the UI is not available then. The UI becomes available after the call to the component's drawing procedure, which is too late.
+      Exit;
+    end;
+
+    if Cmd = CCGRM_PluginStartup then
+    begin
+      AContext.Connection.Socket.WriteLn('Plugin is ready.');
+      {AddToLogFromThread}DynTFT_DebugConsole('RS server (back connection) available.');   //It's safe to call DynTFT_DebugConsole from thread, in Delphi only, and only if the log is a system component, which uses SendMessage to get/set content.
       Exit;
     end;
 
@@ -643,273 +707,164 @@ begin
   end;
 end;
 
+
+procedure TServerHandlers.FtmrCheckConnectionTimer(Sender: TObject);
+begin
+  try
+    SendPingCommandToServer;
+    DisplayConnectionStatus(True);
+  except
+    on E: Exception do
+    begin
+      try
+        FIdTCPClient.ConnectTimeout := CPluginClientReConnectTimeout;
+        try
+          FIdTCPClient.Connect(FRemoteSystemServerAddress, FRemoteSystemServerPort);
+        finally
+          FIdTCPClient.ConnectTimeout := CPluginClientConnectTimeout;
+        end;
+        
+        DynTFT_DebugConsole('Connected to server for DynTFTCGSystem components.');
+        SendPluginStartupCommandToServer;
+        SendPluginPortCommandToServer;
+        SendPingCommandToServer;
+        DisplayConnectionStatus(True);
+      except
+        DisplayConnectionStatus(False);    //False means not connected
+      end;
+    end;
+  end;
+end;
+
 //////////////////////////
+
+
+procedure DrawDynTFTComponentProc(APanel: TUIPanelBase; CompType: string; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
+begin
+  SendCommandToServer(CompType, EncodePanelBasePropertiesToString(APanel));
+  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
+
+  try
+    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10, CDrawingCmdTimeout, CMaxLineLen));
+  except
+    on E: Exception do
+      DynTFT_DebugConsole(CompType + ' callback ex: ' + E.Message);    // Please increase the value of CMaxLineLen, if a project with multiple components displays "Max line length exceeded."
+  end;
+end;
 
 
 procedure TDrawDynTFTComponentProc_Button(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_Button, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('Button callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_Button, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 
 procedure TDrawDynTFTComponentProc_ArrowButton(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_ArrowButton, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('ArrowButton callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_ArrowButton, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_Panel(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_Panel, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('Panel callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_Panel, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_CheckBox(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_CheckBox, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('CheckBox callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_CheckBox, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_ScrollBar(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_ScrollBar, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('ScrollBar callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_ScrollBar, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_Items(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_Items, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('Items callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_Items, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_ListBox(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_ListBox, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('ListBox callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_ListBox, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_Label(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_Label, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('Label callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_Label, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_RadioButton(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_RadioButton, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('RadioButton callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_RadioButton, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_RadioGroup(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_RadioGroup, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('RadioGroup callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_RadioGroup, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_TabButton(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_TabButton, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('TabButton callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_TabButton, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_PageControl(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_PageControl, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('PageControl callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_PageControl, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_Edit(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_Edit, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('Edit callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_Edit, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_KeyButton(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_KeyButton, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10, 300));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('KeyButton callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_KeyButton, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_VirtualKeyboard(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_VirtualKeyboard, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('VirtualKeyboard callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_VirtualKeyboard, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_ComboBox(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_ComboBox, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('ComboBox callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_ComboBox, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_TrackBar(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_TrackBar, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('TrackBar callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_TrackBar, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_ProgressBar(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_ProgressBar, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('ProgressBar callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_ProgressBar, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 
 procedure TDrawDynTFTComponentProc_MessageBox(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CCGRM_DrawPDynTFTComponentOnPanel_MessageBox, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
-
-  try
-    ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10));
-  except
-    on E: Exception do
-      DynTFT_DebugConsole('MessageBox callback ex: ' + E.Message);
-  end;
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_MessageBox, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
 end;
 
 

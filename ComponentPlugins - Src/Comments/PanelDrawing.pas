@@ -126,7 +126,7 @@ begin
   DynTFTInitComponentContainers;
   UseTFTTrueColor := True;
   
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_Comment);
+  RegisterCompDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_Comment);
 end;
 
 

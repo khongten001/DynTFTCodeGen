@@ -58,7 +58,8 @@ uses
   MemManager in 'D:\DynTFT\MemManager.pas',
   TFTCallbacks in '..\TFTCallbacks.pas',
   DynTFTCodeGenImgFormRS in 'DynTFTCodeGenImgFormRS.pas' {frmImg},
-  RemoteSystemCommands in 'RemoteSystemCommands.pas';
+  RemoteSystemCommands in 'RemoteSystemCommands.pas',
+  RSSettingsForm in 'RSSettingsForm.pas' {frmRSSettings};
 
 {$R *.res}
 

@@ -49,8 +49,9 @@ uses
   {$ENDIF}
   Interfaces, // this includes the CT adLCL widgetset
   Forms, DynTFTCGRemoteSystemServerMainForm, RemoteSystemCommands, PanelDrawing,
-  DynTFTPluginUtils, DynTFTCodeGenSharedDataTypes, DynTFTSharedUtils, TFT,
-  ComponentIcons, DynTFTCodeGenImgFormFP;
+  DynTFTColorThemeGenLiveColors, DynTFTPluginUtils,
+  DynTFTCodeGenSharedDataTypes, DynTFTSharedUtils, TFT, ComponentIcons,
+  DynTFTCodeGenImgFormFP;
 
 {$R *.res}
 
@@ -61,6 +62,6 @@ begin
   Application.CreateForm(TfrmDynTFTCGRemoteSystemServerMain, frmDynTFTCGRemoteSystemServerMain);
   Application.CreateForm(TdmIcons, dmIcons);
   Application.CreateForm(TfrmImg, frmImg);
-  Application.Run;
+  Application.Run;           //If "Can't create object file" error is displayed, it means the server is still running. It can be closed from Task Manager.
 end.
 

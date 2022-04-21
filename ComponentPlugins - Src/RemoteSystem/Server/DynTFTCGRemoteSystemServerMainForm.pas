@@ -43,6 +43,7 @@ unit DynTFTCGRemoteSystemServerMainForm;
 interface
 
 uses
+  Types,
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
   IdTCPServer, IdSync, IdCustomTCPServer, IdContext, IdTCPClient;
 
@@ -53,14 +54,20 @@ type
   TfrmDynTFTCGRemoteSystemServerMain = class(TForm)
     IdTCPServer1: TIdTCPServer;
     memLog: TMemo;
+    tmrPrepareClient: TTimer;
+    tmrCloseClient: TTimer;
     tmrStartup: TTimer;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure IdTCPServer1Execute(AContext: TIdContext);
+    procedure tmrCloseClientTimer(Sender: TObject);
+    procedure tmrPrepareClientTimer(Sender: TObject);
     procedure tmrStartupTimer(Sender: TObject);
   private
     procedure AddToLog(s: string);
     procedure AddToLogFromThread(s: string);
+    procedure PrepareClient;
+    procedure CloseClient;
   public
 
   end;
@@ -70,6 +77,17 @@ type
   protected
     procedure DoSynchronize; override;
   end;
+
+  TPrepareClientSyncObj = class(TIdSync)
+  protected
+    procedure DoSynchronize; override;
+  end;
+
+  TCloseClientSyncObj = class(TIdSync)
+  protected
+    procedure DoSynchronize; override;
+  end;
+
 
 var
   frmDynTFTCGRemoteSystemServerMain: TfrmDynTFTCGRemoteSystemServerMain;
@@ -81,14 +99,20 @@ implementation
 
 uses
   RemoteSystemCommands, IdIOHandlerSocket, ComponentIcons, DynTFTPluginUtils, PanelDrawing,
-  DynTFTCodeGenSharedDataTypes, TFT, DynTFTSharedUtils;
+  DynTFTCodeGenSharedDataTypes, TFT, DynTFTSharedUtils, DynTFTColorThemeGenLiveColors;
+
+
+const
+  CMaxLineLen = 131072;
 
 
 var
   DrawingCommands: array of string;
   FDrawingProcedures: TDrawDynTFTComponentProcArr;
   FIdTCPClient: TIdTCPClient;
-
+  FWHLabel: TLabel;
+  FPluginAddress: string;
+  FPluginPort: Integer;
 
 
 procedure TSyncObj.DoSynchronize;
@@ -96,10 +120,24 @@ begin
   frmDynTFTCGRemoteSystemServerMain.AddToLog(FMsg);
 end;
 
+
+procedure TPrepareClientSyncObj.DoSynchronize;
+begin
+  frmDynTFTCGRemoteSystemServerMain.tmrPrepareClient.Enabled := True;
+end;
+
+
+procedure TCloseClientSyncObj.DoSynchronize;
+begin
+  frmDynTFTCGRemoteSystemServerMain.tmrCloseClient.Enabled := True;
+end;
+
+
 { TfrmDynTFTCGRemoteSystemServerMain }
 
 procedure TfrmDynTFTCGRemoteSystemServerMain.FormCreate(Sender: TObject);
 begin
+  FPluginPort := 0;
   tmrStartup.Enabled := True;
 end;
 
@@ -335,7 +373,7 @@ begin
       //IdentifierName := Copy(Str, 1, Pos(CRecFieldSeparator, Str) - 1);
       Delete(Str, 1, Pos(CRecFieldSeparator, Str) + SepLen - 1);
 
-      FontSize := StrToIntDef(Copy(Str, 1, Pos(CRecFieldSeparator, Str) - 1), 8);
+      FontSize := HexToInt(Copy(Str, 1, Pos(CRecFieldSeparator, Str) - 1));
       Delete(Str, 1, Pos(CRecFieldSeparator, Str) + SepLen - 1);
 
       Bold := Copy(Str, 1, Pos(CRecFieldSeparator, Str) - 1) = '1';
@@ -350,10 +388,10 @@ begin
       StrikeOut := Copy(Str, 1, Pos(CRecFieldSeparator, Str) - 1) = '1';
       Delete(Str, 1, Pos(CRecFieldSeparator, Str) + SepLen - 1);
 
-      Charset := StrToIntDef(Copy(Str, 1, Pos(CRecFieldSeparator, Str) - 1), 1);  //1 = DEFAULT_CHARSET
+      Charset := HexToInt(Copy(Str, 1, Pos(CRecFieldSeparator, Str) - 1));  //1 = DEFAULT_CHARSET
       Delete(Str, 1, Pos(CRecFieldSeparator, Str) + SepLen - 1);
 
-      Pitch := StrToIntDef(Str, 0); //can be 0, 1, 2
+      Pitch := HexToInt(Str); //can be 0, 1, 2
 
       New(ATempFontSettings[i].SFont);
       ATempFontSettings[i].FontPropertyValue := FontPropertyValue;
@@ -412,10 +450,10 @@ begin
 
   try
     try
-      PropertiesOrEvents := ASocket.ReadLn(#13#10, 400);
-      SchemaConstants := ASocket.ReadLn(#13#10, 400);
-      ColorConstants := ASocket.ReadLn(#13#10, 400);
-      FontSettings := ASocket.ReadLn(#13#10, 400);
+      PropertiesOrEvents := ASocket.ReadLn(#13#10, 400, CMaxLineLen);
+      SchemaConstants := ASocket.ReadLn(#13#10, 400, CMaxLineLen);
+      ColorConstants := ASocket.ReadLn(#13#10, 400, CMaxLineLen);
+      FontSettings := ASocket.ReadLn(#13#10, 400, CMaxLineLen);
     except
       on E: Exception do
         frmDynTFTCGRemoteSystemServerMain.AddToLogFromThread('Reading component info from plugin ex: ' + E.Message);
@@ -495,7 +533,10 @@ procedure Set_Font_Callback(activeFont: PByte; font_color: TColor; font_orientat
 var
   Res: string;
   FontAddress: string;
+  TempWorkCanvas: TCanvas;
 begin
+  TempWorkCanvas := FWHLabel.Canvas;
+
   try
     //IdentifierName is used to store the pointer, since the actual identifier name is not needed here on server.
     FontAddress := PDynTFTFontSettings(activeFont)^.IdentifierName;
@@ -504,6 +545,36 @@ begin
            'activeFont=' + FontAddress + CDrawingCmdFieldSeparator +
            'font_color=' + IntToHex(font_color) + CDrawingCmdFieldSeparator +
            'font_orientation=' + IntToHex(font_orientation);
+
+    try
+      TempWorkCanvas.Lock;
+      try
+        TempWorkCanvas.Font.Name := PDynTFTFontSettings(activeFont)^.FontName;
+        TempWorkCanvas.Font.Size := PDynTFTFontSettings(activeFont)^.FontSize;
+        TempWorkCanvas.Font.Style := [];
+
+        if PDynTFTFontSettings(activeFont)^.Bold then
+          TempWorkCanvas.Font.Style := TempWorkCanvas.Font.Style + [fsBold];
+
+        if PDynTFTFontSettings(activeFont)^.Italic then
+          TempWorkCanvas.Font.Style := TempWorkCanvas.Font.Style + [fsItalic];
+
+        if PDynTFTFontSettings(activeFont)^.Underline then
+          TempWorkCanvas.Font.Style := TempWorkCanvas.Font.Style + [fsUnderline];
+
+        if PDynTFTFontSettings(activeFont)^.StrikeOut then
+          TempWorkCanvas.Font.Style := TempWorkCanvas.Font.Style + [fsStrikeOut];
+
+        TempWorkCanvas.Font.CharSet := PDynTFTFontSettings(activeFont)^.Charset;
+        TempWorkCanvas.Font.Pitch := PDynTFTFontSettings(activeFont)^.Pitch;
+      finally
+        TempWorkCanvas.UnLock;
+      end;
+    except
+      on E: Exception do
+        frmDynTFTCGRemoteSystemServerMain.AddToLogFromThread('Ex on setting local font: ' + E.Message);
+    end;
+
   except
     on E: Exception do
     begin
@@ -622,12 +693,35 @@ end;
 
 procedure GetTextWidthAndHeight_Callback(AText: string; var Width, Height: Word);
 var
-  AStringList: TStringList;
-  WidthHeight: string;
+  TempTextSize: TSize;
+//  AStringList: TStringList;
+//  WidthHeight: string;
+  TempWorkCanvas: TCanvas;
 begin
+  TempWorkCanvas := FWHLabel.Canvas;
+  TempWorkCanvas.Lock;
+  try
+    TempTextSize := TempWorkCanvas.TextExtent(AText);
+    Width := TempTextSize.cx;
+    Height := TempTextSize.cy;
+  finally
+    TempWorkCanvas.UnLock;
+  end;
+
+  if AText > '' then
+    if Width = 0 then
+      frmDynTFTCGRemoteSystemServerMain.AddToLogFromThread('Text "' + AText + '" has width = 0.  FontSize = ' + IntToStr(TempWorkCanvas.Font.Size) + '  FontName = "' + TempWorkCanvas.Font.Name + '".');
+
+  //The following approach uses DynTFTCodeGen's canvas, which should be more accurate than the local canvas (TempWorkCanvas).
+  //If this server runs on the same OS as DynTFTCodeGen, then no visible difference should exist between the two renderings.
+  //However, because of so many calls (and calling callbacks) through TCP, there are race conditions which cause deadlocks.
+  //Noticeable differences will appear, for example, when this server is run on Linux and DynTFTCodeGen uses fonts which are not available in Linux (e.g. Tahoma).
+  //Anyway, the above approach, using a local canvas is way more faster and reliable. Still, not perfect.
+
+  {
   //pair readln with SendPlainStringToServer('Width=' + IntToHex(Width, 4) + #4#5 + 'Height=' + IntToHex(Height, 4));
   FIdTCPClient.Socket.WriteLn(CCGRM_CallbackDraw + '=' + CDPDynTFT_GetTextWidthAndHeight + CDrawingCmdFieldSeparator + 'AText=' + AText);
-  WidthHeight := FIdTCPClient.Socket.ReadLn(#13#10, 200);
+  WidthHeight := FIdTCPClient.Socket.ReadLn(#13#10, 200, CMaxLineLen);
 
   //frmDynTFTCGRemoteSystemServerMain.AddToLogFromThread('Read WidthHeight: ' + WidthHeight);
 
@@ -639,7 +733,7 @@ begin
   finally
     AStringList.Free;
   end;
-
+  }
   //AddDrawingCommand(Res);   //commented because this procedure already calls Socket.WriteLn / Socket.ReadLn
 end;
 
@@ -687,11 +781,168 @@ begin
 end;
 
 
+procedure TfrmDynTFTCGRemoteSystemServerMain.PrepareClient;
+var
+  Response: string;
+begin
+  FWHLabel := TLabel.Create(Self);       //This has to be recreated for every connection, otherwise it's useless (some resource gets owned and never released).
+  FWHLabel.Parent := Self;
+  FWHLabel.AutoSize := False;
+  FWHLabel.Width := 1000;
+  FWHLabel.Height := 100;
+
+  FIdTCPClient := TIdTCPClient.Create(nil);
+
+  try
+    FIdTCPClient.ConnectTimeout := 1000;
+    FIdTCPClient.ReadTimeout := 1000;
+    FIdTCPClient.UseNagle := False;
+    FIdTCPClient.Connect(FPluginAddress, FPluginPort);
+    AddToLog('Connected to callback server from DynTFTCGRemoteSystem plugin.');
+
+    Application.ProcessMessages;
+    FIdTCPClient.Socket.WriteLn(CCGRM_PluginStartup + '=RS');
+    Response := FIdTCPClient.Socket.ReadLn(#13#10, 500, CMaxLineLen);
+
+    AddToLog('Plugin startup response: ' + Response);
+  except
+    on E: Exception do
+      AddToLog('Can''t connect to callback server. ' + E.Message);
+  end;
+end;
+
+
+procedure TfrmDynTFTCGRemoteSystemServerMain.CloseClient;
+begin
+  try
+    try
+      FIdTCPClient.Socket.CloseGracefully;
+      FIdTCPClient.Disconnect;
+    except
+      on E: Exception do
+        AddToLogFromThread('Can''t disconnect from callback server. Maybe it''s disconnected already. ' + E.Message);
+    end;
+
+    FreeAndNil(FIdTCPClient);
+  except
+    on E: Exception do
+      AddToLogFromThread('Can''t properly destroy client module. ' + E.Message);
+  end;
+
+  FreeAndNil(FWHLabel);
+end;
+
+
+procedure PrepareClientFromThread;
+var
+  SynObj: TPrepareClientSyncObj;
+begin
+  SynObj := TPrepareClientSyncObj.Create;
+  try
+    SynObj.Synchronize;
+  finally
+    SynObj.Free;
+  end;
+end;
+
+
+procedure CloseClientFromThread;
+var
+  SynObj: TCloseClientSyncObj;
+begin
+  SynObj := TCloseClientSyncObj.Create;
+  try
+    SynObj.Synchronize;
+  finally
+    SynObj.Free;
+  end;
+end;
+
+
+procedure Handle_UpdateLiveColorConstants(ASocket: TIdIOHandlerSocket);
+var
+  AComponentIndex, AColorIndex, ANewColor: Integer;
+begin
+  AComponentIndex := ASocket.ReadInt32;
+  AColorIndex := ASocket.ReadInt32;
+  ANewColor := ASocket.ReadInt32;
+
+  LiveColors[AComponentIndex]^[AColorIndex]^ := ANewColor;
+end;
+
+
+procedure Handle_BackupLiveColorConstants;
+var
+  i, j: Integer;
+begin
+  for i := 0 to Length(BackupLiveColors) - 1 do
+    for j := 0 to LiveColorsConstCount[i] - 1 do
+    begin
+      try
+        BackupLiveColors[i]^[j] := LiveColors[i]^[j]^;
+      except
+        on E: Exception do
+          frmDynTFTCGRemoteSystemServerMain.AddToLogFromThread('Exception on BackupLiveColorConstants at i = ' + IntToStr(i) + '  j = ' + IntToStr(j) + '    ' + E.Message);
+      end;
+    end;
+end;
+
+
+procedure Handle_RestoreColorConstantsFromBackup;
+var
+  i, j: Integer;
+begin
+  for i := 0 to Length(BackupLiveColors) - 1 do
+    for j := 0 to LiveColorsConstCount[i] - 1 do
+      LiveColors[i]^[j]^ := BackupLiveColors[i]^[j];
+end;
+
+
+procedure Handle_CanUpdateLiveColorConstant(ASocket: TIdIOHandlerSocket);
+var
+  ComponentIndex, ColorIndex: Integer;
+begin
+  ComponentIndex := ASocket.ReadInt32;
+  ColorIndex := ASocket.ReadInt32;
+
+  if ComponentIndex > Length(LiveColors) - 1 then
+  begin
+    //DynTFT_DebugConsole('Can''t update LiveColors array. ComponentIndex is greater than array length - 1. ComponentIndex = ' + IntToStr(ComponentIndex) + '  Length = ' + IntToStr(Length(LiveColors)));
+    ASocket.WriteLn('False');
+    Exit;
+  end;
+
+  if ColorIndex > LiveColorsConstCount[ComponentIndex] - 1 then
+  begin
+    //DynTFT_DebugConsole('Can''t update LiveColors array. ColorIndex is greater than color constants count - 1. ColorIndex = ' + IntToStr(ColorIndex) + '  Count = ' + IntToStr(LiveColorsConstCount[ComponentIndex]));
+    ASocket.WriteLn('False');
+    Exit;
+  end;
+
+  ASocket.WriteLn('True');
+end;
+
+
+procedure Handle_GetLiveColorsConstCountByComponent(ASocket: TIdIOHandlerSocket);
+var
+  ComponentIndex, Res: Integer;
+begin
+  ComponentIndex := ASocket.ReadInt32;
+
+  if (ComponentIndex < 0) or (ComponentIndex > Length(LiveColors) - 1) then
+    Res := -1
+  else
+    Res := LiveColorsConstCount[ComponentIndex];
+
+  ASocket.Write(LongInt(Res));
+end;
+
+
 procedure TfrmDynTFTCGRemoteSystemServerMain.IdTCPServer1Execute(AContext: TIdContext);
 var
   Cmd, CmdParam: string;
 begin
-  Cmd := AContext.Connection.Socket.ReadLn(#13#10, 50);   
+  Cmd := AContext.Connection.Socket.ReadLn(#13#10, 50, CMaxLineLen);
 
   if Cmd = '' then
   begin
@@ -717,19 +968,6 @@ begin
   if Cmd = CCGRM_PluginStartup then
   begin
     AddToLogFromThread(Cmd);
-
-    FIdTCPClient := TIdTCPClient.Create(nil);
-    try
-      FIdTCPClient.ConnectTimeout := 1000;
-      FIdTCPClient.ReadTimeout := 1000;
-      FIdTCPClient.UseNagle := False;
-      FIdTCPClient.Connect('127.0.0.1', 3581);
-      AddToLog('Connected to callback server from DynTFTCGRemoteSystem plugin.');
-      FIdTCPClient.Socket.WriteLn('CCGRM_PluginStartup=RS');
-    except
-      on E: Exception do
-        AddToLogFromThread('Can''t connect to callback server. ' + E.Message);
-    end;
     Exit;
   end;
 
@@ -737,15 +975,76 @@ begin
   begin
     AddToLogFromThread(Cmd);
     AddToLogFromThread('');
-
-    try
-      FIdTCPClient.Disconnect;
-    except
-      on E: Exception do
-        AddToLogFromThread('Can''t disconnect from callback server. Maybe it''s disconnected already. ' + E.Message);
-    end;
+    CloseClientFromThread;
     Exit;
   end;
+
+  if Cmd = CCGRM_PluginPort then
+  begin
+    FPluginAddress := AContext.Connection.Socket.Binding.PeerIP;
+    FPluginPort := StrToIntDef(CmdParam, 100);
+    AddToLogFromThread('Plugin port set to ' + IntToStr(FPluginPort));
+    PrepareClientFromThread;
+    Exit;
+  end;
+
+  if Cmd = CCGRM_DisconnectFromPlugin then
+  begin
+    AddToLogFromThread(Cmd);
+    CloseClientFromThread;
+    Exit;
+  end;
+
+  {if Cmd = CCGRM_Ping then
+  begin
+    //blink something on the main window
+    Exit;
+  end; }
+
+  if Cmd = CCGRM_UpdateLiveColorConstants then
+  begin
+    Handle_UpdateLiveColorConstants(AContext.Connection.Socket);
+    Exit;
+  end;
+
+  if Cmd = CCGRM_BackupLiveColorConstants then
+  begin
+    Handle_BackupLiveColorConstants;
+    Exit;
+  end;
+
+  if Cmd = CCGRM_RestoreColorConstantsFromBackup then
+  begin
+    Handle_RestoreColorConstantsFromBackup;
+    Exit;
+  end;
+
+  if Cmd = CCGRM_CanUpdateLiveColorConstant then
+  begin
+    Handle_CanUpdateLiveColorConstant(AContext.Connection.Socket);
+    Exit;
+  end;
+
+  if Cmd = CCGRM_GetLiveColorsConstCountByComponent then
+  begin
+    Handle_GetLiveColorsConstCountByComponent(AContext.Connection.Socket);
+    Exit;
+  end;
+end;
+
+
+procedure TfrmDynTFTCGRemoteSystemServerMain.tmrCloseClientTimer(Sender: TObject);
+begin
+  tmrCloseClient.Enabled := False;
+  CloseClient;
+end;
+
+
+procedure TfrmDynTFTCGRemoteSystemServerMain.tmrPrepareClientTimer(
+  Sender: TObject);
+begin
+  tmrPrepareClient.Enabled := False;
+  PrepareClient;
 end;
 
 

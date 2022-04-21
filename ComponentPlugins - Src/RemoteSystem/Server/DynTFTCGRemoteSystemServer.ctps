@@ -25,9 +25,9 @@
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="116"/>
-        <CursorPos X="40" Y="123"/>
-        <UsageCount Value="34"/>
+        <TopLine Value="373"/>
+        <CursorPos X="59" Y="391"/>
+        <UsageCount Value="202"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -47,9 +47,9 @@
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="128"/>
-        <CursorPos X="40" Y="132"/>
-        <UsageCount Value="31"/>
+        <TopLine Value="43"/>
+        <CursorPos X="25" Y="64"/>
+        <UsageCount Value="232"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
@@ -64,7 +64,7 @@
         <WindowIndex Value="0"/>
         <TopLine Value="30"/>
         <CursorPos X="20" Y="39"/>
-        <UsageCount Value="31"/>
+        <UsageCount Value="232"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
       <Unit>
@@ -196,7 +196,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="7"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
       <Unit>
@@ -255,8 +255,8 @@
         <Caret Line="76" Column="33" TopLine="59"/>
       </Position>
       <Position>
-        <Filename Value="..\..\DynTFTPluginUtils.pas"/>
-        <Caret Line="132" Column="40" TopLine="113"/>
+        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
+        <Caret Line="126" Column="53" TopLine="113"/>
       </Position>
       <Position>
         <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
@@ -300,7 +300,7 @@
       </Position>
       <Position>
         <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
-        <Caret Line="106" Column="43" TopLine="82"/>
+        <Caret Line="111" Column="43" TopLine="82"/>
       </Position>
       <Position>
         <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
@@ -312,7 +312,7 @@
       </Position>
       <Position>
         <Filename Value="..\..\System\PanelDrawing.pas"/>
-        <Caret Line="112" Column="48" TopLine="100"/>
+        <Caret Line="114" Column="48" TopLine="100"/>
       </Position>
       <Position>
         <Filename Value="..\..\System\PanelDrawing.pas"/>
@@ -324,7 +324,7 @@
       </Position>
       <Position>
         <Filename Value="..\..\DynTFTPluginUtils.pas"/>
-        <Caret Line="132" Column="40" TopLine="131"/>
+        <Caret Line="92" Column="53" TopLine="82"/>
       </Position>
       <Position>
         <Filename Value="..\..\System\PanelDrawing.pas"/>
@@ -336,7 +336,7 @@
       </Position>
       <Position>
         <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
-        <Caret Line="151" Column="32" TopLine="88"/>
+        <Caret Line="913" Column="43" TopLine="897"/>
       </Position>
       <Position>
         <Filename Value="..\..\System\PanelDrawing.pas"/>
@@ -351,8 +351,8 @@
         <Caret Line="145" Column="138" TopLine="123"/>
       </Position>
       <Position>
-        <Filename Value="DynTFTCGRemoteSystemServerMainForm.pas"/>
-        <Caret Line="122" Column="38" TopLine="101"/>
+        <Filename Value="..\..\DynTFTSharedUtils.pas"/>
+        <Caret Line="51" Column="10" TopLine="82"/>
       </Position>
     </JumpHistory>
     <RunParams>

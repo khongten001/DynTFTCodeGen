@@ -43,7 +43,7 @@ interface
 {$DEFINE IsDesktop}
 
 uses
-  DynTFTCodeGenSharedDataTypes;
+  DynTFTCodeGenSharedDataTypes, DynTFTPluginUtils;
 
 procedure RegisterAllComponentsEvents; stdcall;
 procedure DrawPDynTFTComponentOnPanel(var APanelBase: TUIPanelBase; APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings: TDynArrayRef; ASetPropertiesCallback: TSetPropertiesCallback); stdcall;
@@ -63,12 +63,15 @@ procedure RegisterDynTFTDrawingProcedures(
   AGetTextWidthAndHeight_Callback: TDynTFT_GetTextWidthAndHeight_Callback;
   ADynTFT_DrawBitmap_Callback: TDynTFT_DrawBitmap_Callback ); stdcall;
 
+procedure GetDrawingProcedures(var ADrawingProcedures: TDrawDynTFTComponentProcArr);
+
 implementation
 
 
 uses
   SysUtils, Graphics, Classes, Math,
-  DynTFTCodeGenImgForm, DynTFTSharedUtils, DynTFTPluginUtils, TFTCallbacks,
+  {$IFDEF FPC} DynTFTCodeGenImgFormFP, {$ELSE} DynTFTCodeGenImgForm, {$ENDIF}
+  DynTFTSharedUtils, TFTCallbacks,
 
   MemManager, TFT, DynTFTUtils, DynTFTTypes, DynTFTBaseDrawing, DynTFTConsts,
   DynTFTButton, DynTFTArrowButton, DynTFTPanel, DynTFTCheckBox, DynTFTScrollBar,
@@ -79,7 +82,7 @@ uses
 
 
 var
-  FDrawingProcedures: TDrawDynTFTComponentProcArr;
+  FCompDrawingProcedures: TDrawDynTFTComponentProcArr;
 
   
 function ItemIsVisible(Item: string): Boolean;
@@ -117,6 +120,25 @@ begin
 
   IsVisible^ := ItemIsVisible(Items_Visibility.Strings[Index]);
   IsEnabled^ := ItemIsEnabled(Items_Enabling.Strings[Index]);
+end;
+
+
+procedure ItemsOnDrawIcon(AItems: PPtrRec; Index, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF});
+var
+  IconLeft: TSInt;
+  TempItemHeight: Word;
+begin
+  IconLeft := PDynTFTItems(TPtrRec(AItems))^.BaseProps.Left + CIconIndent;   //If the compiler reports that CIconIndent is not found, then please enable ListIcons at project level.
+
+  TempItemHeight := PDynTFTItems(TPtrRec(AItems))^.ItemHeight;
+
+  DynTFT_Set_Pen($00A0A0, 1);
+  DynTFT_Set_Brush(1, CL_YELLOW, 0, 0, 0, 0);
+  DynTFT_Rectangle(IconLeft, ItemY, IconLeft + TempItemHeight, ItemY + TempItemHeight - 1);
+
+  DynTFT_Set_Pen(CL_OLIVE, 1);
+  DynTFT_Line(IconLeft, ItemY, IconLeft + TempItemHeight - 5, ItemY + 3);
+  DynTFT_V_Line(ItemY + 3, ItemY + TempItemHeight, IconLeft + TempItemHeight - 5 - 1);
 end;
 
 
@@ -250,7 +272,8 @@ begin
   ADynTFTItems^.TotalVisibleCount := GetTotalComponentVisibleCount;
   ADynTFTItems^.BaseProps.Enabled := StrToIntDef(GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'Enabled'), 1);
   ADynTFTItems^.ActiveFont := PByte(FontPropertyValueToSFont(AFontSettings, GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, PropertyNamePrefix + 'ActiveFont')));
-end;
+  ADynTFTItems^.VisibleIcons := GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, PropertyNamePrefix + 'VisibleIcons') = 'True';
+end;                                                                                            
 
 
 procedure PrepareListBox(var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; ADynTFTListBox: PDynTFTListBox);
@@ -539,13 +562,16 @@ begin
 
     New(ADynTFTItems^.OnGetItem);
     New(ADynTFTItems^.OnGetItemVisibility);
+    New(ADynTFTItems^.OnDrawIcon);
     try
       ADynTFTItems^.OnGetItem^ := ItemsOnGetItem;
       ADynTFTItems^.OnGetItemVisibility^ := ItemsOnGetItemVisibility;
+      ADynTFTItems^.OnDrawIcon^ := ItemsOnDrawIcon;
       DynTFTDrawitems(ADynTFTItems, True);
     finally
       Dispose(ADynTFTItems^.OnGetItem);
       Dispose(ADynTFTItems^.OnGetItemVisibility);
+      Dispose(ADynTFTItems^.OnDrawIcon);
     end;
   finally
     Dispose(ADynTFTItems);
@@ -610,13 +636,16 @@ begin
 
         New(ADynTFTListBox^.Items^.OnGetItem);
         New(ADynTFTListBox^.Items^.OnGetItemVisibility);
+        New(ADynTFTListBox^.Items^.OnDrawIcon);
         try
           ADynTFTListBox^.Items^.OnGetItem^ := ItemsOnGetItem;
           ADynTFTListBox^.Items^.OnGetItemVisibility^ := ItemsOnGetItemVisibility;
+          ADynTFTListBox^.Items^.OnDrawIcon^ := ItemsOnDrawIcon;
           DynTFTDrawitems(ADynTFTListBox^.Items, True);
         finally
           Dispose(ADynTFTListBox^.Items^.OnGetItem);
           Dispose(ADynTFTListBox^.Items^.OnGetItemVisibility);
+          Dispose(ADynTFTListBox^.Items^.OnDrawIcon);
         end;
 
         DynTFTDrawScrollBar(ADynTFTListBox^.VertScrollBar, True);
@@ -969,8 +998,6 @@ begin
       Items_Visibility := TStringList.Create;
       Items_Enabling := TStringList.Create;
       try
-        //ADynTFTComboBox^.ListBox^.Items^.Count := 0;
-
         UpdateBaseProperties(APanel, PropertiesOrEvents, ADynTFTComboBox^.BaseProps);
         UpdateBaseProperties(APanel, PropertiesOrEvents, ADynTFTComboBox^.ArrowButton^.BaseProps);
         UpdateBaseProperties(APanel, PropertiesOrEvents, ADynTFTComboBox^.Edit^.BaseProps);
@@ -1152,25 +1179,25 @@ begin
   DynTFTRegisterProgressBarEvents;         // {$IFDEF IsDesktop}DynTFT_DebugConsole('ProgressBar type: ' + IntToStr(DynTFTGetProgressBarComponentType));{$ENDIF}
   DynTFTRegisterMessageBoxEvents;          // {$IFDEF IsDesktop}DynTFT_DebugConsole('MessageBox type: ' + IntToStr(DynTFTGetMessageBoxComponentType));{$ENDIF}
 
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_Button);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_ArrowButton);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_Panel);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_CheckBox);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_ScrollBar);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_Items);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_ListBox);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_Label);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_RadioButton);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_RadioGroup);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_TabButton);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_PageControl);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_Edit);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_KeyButton);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_VirtualKeyboard);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_ComboBox);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_TrackBar);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_ProgressBar);
-  RegisterDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_MessageBox);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_Button);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_ArrowButton);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_Panel);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_CheckBox);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_ScrollBar);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_Items);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_ListBox);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_Label);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_RadioButton);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_RadioGroup);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_TabButton);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_PageControl);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_Edit);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_KeyButton);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_VirtualKeyboard);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_ComboBox);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_TrackBar);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_ProgressBar);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_MessageBox);
 end;
 
 
@@ -1216,12 +1243,22 @@ begin
     raise Exception.Create('UserTFTCommands compiler directive is not defined. Please use DynTFTCodeGen callbacks.');   //UserTFTCommands should be defined at project level. Please rebuild the project after that.
   {$ENDIF}
 
-  DrawPDynTFTComponentOnPanelBase(APanelBase, FDrawingProcedures, APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings, ASetPropertiesCallback);
+  DrawPDynTFTComponentOnPanelBase(APanelBase, FCompDrawingProcedures, APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings, ASetPropertiesCallback);
+end;
+
+
+procedure GetDrawingProcedures(var ADrawingProcedures: TDrawDynTFTComponentProcArr);
+var
+  i: Integer;
+begin
+  SetLength(ADrawingProcedures, Length(FCompDrawingProcedures));
+  for i := 0 to Length(FCompDrawingProcedures) - 1 do
+    ADrawingProcedures[i] := FCompDrawingProcedures[i];
 end;
 
 
 initialization
-  SetLength(FDrawingProcedures, 0);
+  SetLength(FCompDrawingProcedures, 0);
   GCanvas := nil;
   
 end.

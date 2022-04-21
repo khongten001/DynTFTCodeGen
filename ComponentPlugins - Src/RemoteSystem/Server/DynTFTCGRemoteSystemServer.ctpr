@@ -75,6 +75,7 @@
         <FRMtype Value="200"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmImg"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit>
       <Unit>
@@ -83,6 +84,10 @@
       </Unit>
       <Unit>
         <Filename Value="..\..\DynTFTSharedUtils.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\System\DynTFTColorThemeGenLiveColors.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
@@ -120,7 +125,9 @@
 -dDynTFTFontSupport
 -dItemsVisibility
 -dItemsEnabling
--dUserTFTCommands"/>
+-dUserTFTCommands
+-dListIcons
+-dItemsTextCrop"/>
     </Other>
   </CompilerOptions>
   <Debugging>

@@ -48,7 +48,16 @@ const
   CCGRM_PluginStartup = 'PluginStartup';
   CCGRM_PluginDone = 'PluginDone';
   CCGRM_GetComponentIconFromServer = 'GetComponentIconFromServer';
+  CCGRM_Ping = 'Ping';
+  CCGRM_PluginPort = 'PluginPort';
+  CCGRM_DisconnectFromPlugin = 'DisconnectFromPlugin';
 
+  CCGRM_UpdateLiveColorConstants = 'UpdateLiveColorConstants';
+  CCGRM_BackupLiveColorConstants = 'BackupLiveColorConstants';
+  CCGRM_RestoreColorConstantsFromBackup = 'RestoreColorConstantsFromBackup';
+  CCGRM_CanUpdateLiveColorConstant = 'CanUpdateLiveColorConstant';
+  CCGRM_GetLiveColorsConstCountByComponent = 'GetLiveColorsConstCountByComponent';
+                               
 
   //DynTFT system components:
   CCGRM_DrawPDynTFTComponentOnPanelPrefix = 'DrawPDynTFTComponentOnPanel_';

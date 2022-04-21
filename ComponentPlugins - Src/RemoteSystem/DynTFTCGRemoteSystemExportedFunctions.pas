@@ -41,7 +41,7 @@ unit DynTFTCGRemoteSystemExportedFunctions;
 interface
 
 uses
-  DynTFTCodeGenSharedDataTypes, IdTCPClient;
+  Windows, DynTFTCodeGenSharedDataTypes, IdTCPClient;
 
 function GetPluginName(APluginName: Pointer): Integer; stdcall;
 
@@ -61,12 +61,25 @@ procedure DisplayDebugConsole(AMainFormHandle: THandle); stdcall;
 
 
 //functions and vars used in RSPanelDrawing unit
-function ReadLnStringFromServer: string;
+//function ReadLnStringFromServer: string;
 procedure SendPlainStringToServer(s: string);
 procedure SendCommandToServer(ACmd, ACmdParam: string);
+procedure SendPluginStartupCommandToServer;
+procedure SendPluginPortCommandToServer;
+procedure SendDisconnectFromPluginCommandToServer;
+procedure SendPingCommandToServer;
+
+
+const
+  CPluginClientConnectTimeout =  1000;
+  CPluginClientReConnectTimeout = 100;   //This is how long the UI is freezed when disconnected, on every FtmrCheckConnectionTimer call. Higher values may be needed when connecting over a network.
+
 
 var
   FIdTCPClient: TIdTCPClient;
+  FRemoteSystemServerAddress: string;
+  FRemoteSystemServerPort: Word;
+  FPluginServerPort: Word;
 
   
 implementation
@@ -74,19 +87,15 @@ implementation
 
 uses
   SysUtils, Classes, Forms, DynTFTSharedUtils, Graphics, DynTFTCodeGenImgFormRS,
-  IdBaseComponent, IdComponent, IdTCPConnection, IdIOHandler,
-  DynTFTUtils, RemoteSystemCommands, RSPanelDrawing;
+  IdBaseComponent, IdComponent, IdTCPConnection, IdIOHandler, IniFiles,
+  DynTFTUtils, RemoteSystemCommands, RSPanelDrawing
+  {, SysInit}
+  ;
 
 
 const
   CPluginName = 'System Components';  //the same string is used in color themes which target a specific plugin
   CComponentCount = 19;
-
-
-function ReadLnStringFromServer: string;
-begin
-  Result := FIdTCPClient.Socket.ReadLn(#13#10, 200);
-end;
 
 
 procedure SendPlainStringToServer(s: string);
@@ -107,9 +116,27 @@ begin
 end;
 
 
+procedure SendPluginPortCommandToServer;
+begin
+  SendCommandToServer(CCGRM_PluginPort, IntToStr(FPluginServerPort));
+end;
+
+
+procedure SendDisconnectFromPluginCommandToServer;
+begin
+  SendCommandToServer(CCGRM_DisconnectFromPlugin, CPluginName);
+end;
+
+
 procedure SendPluginDoneCommandToServer;
 begin
   SendCommandToServer(CCGRM_PluginDone, CPluginName);
+end;
+
+
+procedure SendPingCommandToServer;
+begin
+  SendCommandToServer(CCGRM_Ping, CPluginName);
 end;
 
 
@@ -119,6 +146,68 @@ begin
   ATempStream.SetSize(FIdTCPClient.Socket.ReadInt64);
   FIdTCPClient.Socket.ReadStream(ATempStream, ATempStream.Size);
 end;
+
+
+function GetPluginPath: string;
+var
+  PathLen: Integer;
+  Buffer: array[0..2048] of Char;
+begin
+  PathLen := GetModuleFileName(HInstance, @Buffer, SizeOf(Buffer));
+  Result := string(Buffer);
+  SetLength(Result, PathLen);
+end;
+
+
+procedure LoadSettings;
+const
+  CDefaultRSServerAddress: string = '127.0.0.1';
+  CDefaultRSServerPort: Word = 3580;
+  CDefaultPluginServerPort: Word = 3581;
+var
+  Ini: TMemIniFile;
+begin
+  try
+    Ini := TMemIniFile.Create(ExtractFilePath(GetPluginPath) + CPluginName + '.ini');
+    try
+      FRemoteSystemServerAddress := Ini.ReadString('Settings', 'RSServerAddress', CDefaultRSServerAddress);
+      FRemoteSystemServerPort := Ini.ReadInteger('Settings', 'RSServerPort', CDefaultRSServerPort);
+      FPluginServerPort := Ini.ReadInteger('Settings', 'PluginServerPort', CDefaultPluginServerPort);
+    finally
+      Ini.Free;
+    end;
+  except
+    on E: Exception do
+    begin
+      FRemoteSystemServerAddress := CDefaultRSServerAddress;
+      FRemoteSystemServerPort := CDefaultRSServerPort;
+      FPluginServerPort := CDefaultPluginServerPort;
+      DynTFT_DebugConsole('Exception when loading plugin settings: ' + E.Message);
+    end;
+  end;
+end;
+
+
+procedure SaveSettings;
+var
+  Ini: TMemIniFile;
+begin
+  try
+    Ini := TMemIniFile.Create(ExtractFilePath(GetPluginPath) + CPluginName + '.ini');
+    try
+      Ini.WriteString('Settings', 'RSServerAddress', FRemoteSystemServerAddress);
+      Ini.WriteInteger('Settings', 'RSServerPort', FRemoteSystemServerPort);
+      Ini.WriteInteger('Settings', 'PluginServerPort', FPluginServerPort);
+
+      Ini.UpdateFile;
+    finally
+      Ini.Free;
+    end;
+  except
+
+  end;
+end;
+
 
 
 function GetPluginName(APluginName: Pointer): Integer; stdcall;
@@ -134,11 +223,17 @@ begin
   Application.CreateForm(TfrmImg, frmImg);   //Having a form with console or extra component images, is not a requirement for all plugins.
   DynTFT_AssignDebugConsole(frmImg.memLog);
 
+  LoadSettings;
+
   try
     CreateCallbackTCPServer;
   except
     on E: Exception do
+    begin
       DynTFT_DebugConsole('Callback server can''t start. ' + E.Message);
+      DynTFT_DebugConsole('If no other instance of this plugin is running, please wait about 1min, then start again.');
+      frmImg.Show;
+    end;
   end;
 
   FIdTCPClient := TIdTCPClient.Create(nil);
@@ -146,18 +241,27 @@ begin
     FIdTCPClient.ConnectTimeout := 1000;
     FIdTCPClient.ReadTimeout := 1000;
     FIdTCPClient.UseNagle := False;
-    FIdTCPClient.Connect('127.0.0.1', 3580);
+    FIdTCPClient.Connect(FRemoteSystemServerAddress, FRemoteSystemServerPort);
     DynTFT_DebugConsole('Connected to server for DynTFTCGSystem components.');
     SendPluginStartupCommandToServer;
+    SendPluginPortCommandToServer;
+    DisplayConnectionStatus(True);
   except
     on E: Exception do
+    begin
       DynTFT_DebugConsole('Can''t connect to server. ' + E.Message + ' Make sure there is no other running instance of this plugin.');
+      DisplayConnectionStatus(False);
+    end;
   end;
+
+  CreateConnectionTimer;
 end;
 
 
 procedure DonePlugin; stdcall;
 begin
+  DestroyConnectionTimer;
+  
   try
     SendPluginDoneCommandToServer;
     FIdTCPClient.Disconnect;
@@ -174,6 +278,8 @@ begin
 
     FreeAndNil(FIdTCPClient);
   end;
+
+  SaveSettings;
 end;
 
 
@@ -349,31 +455,71 @@ end;
 
 procedure UpdateLiveColorConstants(AComponentIndex, AColorIndex, ANewColor: Integer); stdcall;
 begin
-
+  try
+    SendCommandToServer(CCGRM_UpdateLiveColorConstants, 'Update');
+    FIdTCPClient.Socket.Write(LongInt(AComponentIndex));
+    FIdTCPClient.Socket.Write(LongInt(AColorIndex));
+    FIdTCPClient.Socket.Write(LongInt(ANewColor));
+  except
+    on E: Exception do
+      DynTFT_DebugConsole('Ex in UpdateLiveColorConstants: ' + E.Message);
+  end;
 end;
 
 
 procedure BackupLiveColorConstants; stdcall;
 begin
-
+  try
+    SendCommandToServer(CCGRM_BackupLiveColorConstants, 'Backup');
+  except
+    on E: Exception do
+      DynTFT_DebugConsole('Ex in BackupLiveColorConstants: ' + E.Message);
+  end;
 end;
 
 
 procedure RestoreColorConstantsFromBackup; stdcall;
 begin
-
+  try
+    SendCommandToServer(CCGRM_RestoreColorConstantsFromBackup, 'Restore');
+  except
+    on E: Exception do
+      DynTFT_DebugConsole('Ex in RestoreColorConstantsFromBackup: ' + E.Message);
+  end;
 end;
 
 
 function CanUpdateLiveColorConstant(ComponentIndex, ColorIndex: Integer): Boolean; stdcall;
 begin
-  Result := True;
+  try
+    SendCommandToServer(CCGRM_CanUpdateLiveColorConstant, 'CanUpdate');
+    FIdTCPClient.Socket.Write(LongInt(ComponentIndex));
+    FIdTCPClient.Socket.Write(LongInt(ColorIndex));
+
+    Result := FIdTCPClient.Socket.ReadLn(#13#10, 2000, 131072) = 'True';
+  except
+    on E: Exception do
+    begin
+      DynTFT_DebugConsole('Ex in CanUpdateLiveColorConstant: ' + E.Message);
+      Result := False;
+    end;
+  end;
 end;
 
 
 function GetLiveColorsConstCountByComponent(ComponentIndex: Integer): Integer; stdcall;
 begin
-  Result := -1;
+  try
+    SendCommandToServer(CCGRM_GetLiveColorsConstCountByComponent, 'GetLive');
+    FIdTCPClient.Socket.Write(LongInt(ComponentIndex));
+    Result := FIdTCPClient.Socket.ReadInt32;
+  except
+    on E: Exception do
+    begin
+      DynTFT_DebugConsole('Ex in GetLiveColorsConstCountByComponent: ' + E.Message);
+      Result := -1;
+    end;
+  end;
 end;
 
 

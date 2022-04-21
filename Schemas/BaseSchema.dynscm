@@ -129,7 +129,7 @@ Prop_19_ReadOnly=1
 ;Prop_20_DesignTimeOnly=0
 
 [ComponentEventsPropertiesSchema]
-Count=4
+Count=5
 Prop_0_Name=OnMouseDownUser
 Prop_0_DataType=PDynTFTOnMouseEvent
 Prop_0_DefaultValue=
@@ -158,6 +158,13 @@ Prop_3_Description=This is the MouseClick event for user code.
 Prop_3_AvailableOnCompilerDirectives=MouseClickSupport
 Prop_3_DesignTimeOnly=0
 Prop_3_DataTypeDefinition=procedure _<HandlerName>_(Sender: PPtrRec);
+Prop_4_Name=OnDoubleClickUser
+Prop_4_DataType=PDynTFTOnMouseEvent
+Prop_4_DefaultValue=
+Prop_4_Description=This is the MouseDoubleClick event for user code.
+Prop_4_AvailableOnCompilerDirectives=MouseDoubleClickSupport
+Prop_4_DesignTimeOnly=0
+Prop_4_DataTypeDefinition=procedure _<HandlerName>_(Sender: PPtrRec);
 
 ;These values should resolve to Integer or String (or maybe arrays of these)
 [Constants]

@@ -64,7 +64,7 @@ implementation
 
 
 uses
-  SysUtils, Classes, Forms, ComponentIcons, DynTFTCodeGenImgForm,
+  SysUtils, Classes, Forms, ComponentIcons, {$IFDEF FPC} DynTFTCodeGenImgFormFP, {$ELSE} DynTFTCodeGenImgForm, {$ENDIF}
   DynTFTPluginUtils, DynTFTColorThemeGenLiveColors, DynTFTSharedUtils,
   DynTFTUtils;
 

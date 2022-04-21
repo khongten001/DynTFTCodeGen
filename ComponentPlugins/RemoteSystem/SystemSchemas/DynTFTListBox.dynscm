@@ -1,5 +1,5 @@
 [ComponentPropertiesSchema]
-Count=10
+Count=11
 Prop_0_Name=Items^.Font_Color
 Prop_0_DataType=TColor
 Prop_0_DefaultValue=CL_DynTFTItems_EnabledFont
@@ -62,6 +62,12 @@ Prop_9_DefaultValue=
 Prop_9_Description=These are the enabled items. All default to enabled (True) if not set. In Object Inspector, set enabling as boolean values, one value per line.
 Prop_9_AvailableOnCompilerDirectives=not UseExternalItems,ItemsEnabling
 Prop_9_DesignTimeOnly=0
+Prop_10_Name=Items^.VisibleIcons
+Prop_10_DataType=Boolean
+Prop_10_DefaultValue=False
+Prop_10_Description=When True, the OnDrawIcon event is triggered to draw the item icon. When False, only the item text is displayed.
+Prop_10_AvailableOnCompilerDirectives=ListIcons
+Prop_10_DesignTimeOnly=0
 
 [ComponentPropertiesOverrides]
 Count=2
@@ -71,7 +77,7 @@ Prop_1_Name=Height
 Prop_1_DefaultValue=100
 
 [ComponentEventsPropertiesSchema]
-Count=2
+Count=3
 Prop_0_Name=Items^.OnGetItem
 Prop_0_DataType=POnGetItemEvent
 Prop_0_DefaultValue=
@@ -86,18 +92,28 @@ Prop_1_Description=This is called to override item visibility.
 Prop_1_AvailableOnCompilerDirectives=UseExternalItems
 Prop_1_DesignTimeOnly=0
 Prop_1_DataTypeDefinition=procedure _<HandlerName>_(AItems: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF});
+Prop_2_Name=Items^.OnDrawIcon
+Prop_2_DataType=POnDrawIconEvent
+Prop_2_DefaultValue=
+Prop_2_Description=This is called to draw an icon on every item, only if the VisibleIcons property is True. Usually, the icon coordinates are CIconIndent (as x) and ItemY (as Y).
+Prop_2_AvailableOnCompilerDirectives=ListIcons
+Prop_2_DesignTimeOnly=0
+Prop_2_DataTypeDefinition=procedure _<HandlerName>_(AItems: PPtrRec; Index, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF});
 
 [ComponentEventsOverrides]
 Count=0
 
 [Constants]
-Count=2
+Count=3
 Const_0_Name=CMaxItemsStringLength
 Const_0_DataType=Integer
 Const_0_Value=19
 Const_1_Name=CMaxItemItemCount
 Const_1_DataType=Integer
 Const_1_Value=16
+Const_2_Name=CIconIndent
+Const_2_DataType=Integer
+Const_2_Value=3
 
 [ColorConstants]
 Count=2

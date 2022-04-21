@@ -70,7 +70,12 @@ implementation
 
 
 uses
-  Windows, SysUtils;
+  {$IFDEF UNIX}
+    LCLIntf
+  {$ELSE}
+    Windows
+  {$ENDIF}  
+  , SysUtils;
 
 
 function BelongsTo(x, ALeftLimit, ARightLimit: Integer): Boolean;

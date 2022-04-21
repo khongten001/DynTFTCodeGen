@@ -41,13 +41,16 @@ unit DynTFTCodeGenImgFormRS;
 interface
 
 uses
-  SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, StdCtrls;
+  Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, StdCtrls, ComCtrls;
 
 type
   TfrmImg = class(TForm)
     memLog: TMemo;
+    pnlStatus: TPanel;
+    btnSettings: TButton;
     procedure FormClose(Sender: TObject; var {$IFDEF FPC}CloseAction {$ELSE} Action {$ENDIF}: TCloseAction);
+    procedure btnSettingsClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -55,11 +58,91 @@ type
   end;
 
 var
-  frmImg: TfrmImg; //
+  frmImg: TfrmImg;
 
 implementation
 
 {$R *.dfm}
+
+uses
+  RSSettingsForm, DynTFTCGRemoteSystemExportedFunctions, RSPanelDrawing,
+  DynTFTUtils, IdGlobal, IdTCPServer;
+
+
+procedure TfrmImg.btnSettingsClick(Sender: TObject);
+var
+  tk: Int64;
+  OldRemoteSystemServerAddress: string;
+  OldRemoteSystemServerPort: Word;
+begin
+  OldRemoteSystemServerAddress := FRemoteSystemServerAddress;
+  OldRemoteSystemServerPort := FRemoteSystemServerPort;
+
+  if EditServerSettings(FRemoteSystemServerAddress, FRemoteSystemServerPort, FPluginServerPort) then
+    if (FIdTCPServer.DefaultPort <> FPluginServerPort) or
+       (OldRemoteSystemServerAddress <> FRemoteSystemServerAddress) or
+       (OldRemoteSystemServerPort <> FRemoteSystemServerPort) then
+    begin
+      try
+        FIdTCPServer.ReuseSocket := rsFalse;
+        DynTFT_DebugConsole('Notifying RS about changing port (RS should disconnect from plugin)...');
+
+        try
+          SendDisconnectFromPluginCommandToServer;
+        except
+          on E: Exception do
+            DynTFT_DebugConsole('Exception notifying the RS server about disconnection. Maybe the server is not available: ' + E.Message);
+        end;
+
+        tk := {$IFDEF FPC} GetTickCount64; {$ELSE} GetTickCount; {$ENDIF}
+        repeat
+          Application.ProcessMessages;
+          Sleep(10);
+        until {$IFDEF FPC} GetTickCount64 {$ELSE} GetTickCount {$ENDIF} - tk > 3000;
+
+        DynTFT_DebugConsole('Waiting for the server module to go off...');
+        FIdTCPServer.Active := False;
+
+        tk := {$IFDEF FPC} GetTickCount64; {$ELSE} GetTickCount; {$ENDIF}
+        repeat
+          Application.ProcessMessages;
+          Sleep(10);
+        until {$IFDEF FPC} GetTickCount64 {$ELSE} GetTickCount {$ENDIF} - tk > 3000;
+      except
+        on E: Exception do                                                                 //proably no exception here
+          DynTFT_DebugConsole('Exception closing the server module at plugin side: ' + E.Message);
+      end;
+
+      try
+        FIdTCPServer.Free;
+        Sleep(10);
+        Application.ProcessMessages;
+        CreateCallbackTCPServer;
+
+        DynTFT_DebugConsole('Updating the server module at plugin side to port: ' + IntToStr(FPluginServerPort));
+        FIdTCPServer.DefaultPort := FPluginServerPort;
+      except
+        on E: Exception do
+          DynTFT_DebugConsole('Exception recreating the server module at plugin side: ' + E.Message);
+      end;
+
+      try
+        FIdTCPServer.Active := True;
+        FIdTCPServer.ReuseSocket := rsTrue; //set this after setting Active to true, to be used on reconnecting only
+      except
+        on E: Exception do
+          DynTFT_DebugConsole('Exception updating the server module at plugin side: ' + E.Message);
+      end;
+
+      try
+        SendPluginPortCommandToServer;
+      except
+        on E: Exception do
+          DynTFT_DebugConsole('Exception notifying the RS server about port changing. Maybe the server is not available: ' + E.Message);
+      end;
+    end;
+end;
+
 
 procedure TfrmImg.FormClose(Sender: TObject; var {$IFDEF FPC}CloseAction {$ELSE} Action {$ENDIF}: TCloseAction);
 begin
