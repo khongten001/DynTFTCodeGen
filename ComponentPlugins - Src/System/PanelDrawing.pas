@@ -78,7 +78,7 @@ uses
   DynTFTItems, DynTFTListBox, DynTFTLabel, DynTFTRadioButton, DynTFTRadioGroup,
   DynTFTTabButton, DynTFTPageControl, DynTFTEdit, DynTFTKeyButton,
   DynTFTVirtualKeyboard, DynTFTComboBox, DynTFTTrackBar, DynTFTProgressBar,
-  DynTFTMessageBox;
+  DynTFTMessageBox, DynTFTVirtualTable;
 
 
 var
@@ -184,7 +184,7 @@ begin
   ADynTFTButton^.Color := GetColorConstByNameFromAllColorConsts(ColorConstants, GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'Color'), clRed);
   ADynTFTButton^.Font_Color := GetColorConstByNameFromAllColorConsts(ColorConstants, GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'Font_Color'), clAqua);
   ADynTFTButton^.BaseProps.Enabled := StrToIntDef(GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'Enabled'), 1);
-  ADynTFTButton^.ActiveFont := PByte(FontPropertyValueToSFont(AFontSettings, GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'ActiveFont')));
+  ADynTFTButton^.ActiveFont := PByte(FontPropertyValueToSFont(AFontSettings, GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'ActiveFont')));  //ActiveFont is defined when DynTFTFontSupport exists at project level
 end;
 
 
@@ -454,6 +454,29 @@ end;
 procedure PrepareMessageBox(var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr; AMessageBox: PDynTFTMessageBox);
 begin
   //AMessageBox^.ActiveFont := PByte(FontPropertyValueToSFont(AFontSettings, GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'ActiveFont')));
+end;
+
+
+procedure PrepareVirtualTable(var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; ADynTFTVirtualTable: PDynTFTVirtualTable);
+var
+  i: Integer;
+  LocalHeaderItems: TStringList;
+begin
+  ADynTFTVirtualTable^.BaseProps.Enabled := StrToIntDef(GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'Enabled'), 1);
+  ADynTFTVirtualTable^.VertScrollBar^.BaseProps.Enabled := StrToIntDef(GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'Enabled'), 1);
+  ADynTFTVirtualTable^.HorizScrollBar^.BaseProps.Enabled := StrToIntDef(GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'Enabled'), 1);
+
+  LocalHeaderItems := TStringList.Create;
+  try
+    LocalHeaderItems.Text := GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'HeaderCaptions');
+    for i := 1 to LocalHeaderItems.Count - 1 do //starts at 1, because there is already a first column
+      DynTFTAddColumnToVirtualTable(ADynTFTVirtualTable);
+
+    for i := 0 to LocalHeaderItems.Count - 1 do
+      PDynTFTPanel(ADynTFTVirtualTable^.HeaderItems.Content^[i]).Caption := LocalHeaderItems.Strings[i];
+  finally
+    LocalHeaderItems.Free;
+  end;
 end;
 
 
@@ -1145,15 +1168,61 @@ begin
 end;
 
 
+procedure TDrawDynTFTComponentProc_VirtualTable(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
+var
+  ADynTFTVirtualTable: PDynTFTVirtualTable;
+  //TempFirstListBox: PDynTFTListBox;
+begin
+  try
+    ADynTFTVirtualTable := DynTFTVirtualTable_Create(0, 0, 0, 100, 170);
+  except                                                                ////////////// eventually, remove this exception handling
+    on E: Exception do
+      raise Exception.Create(E.Message + '  on DynTFTVirtualTable_Create');
+  end;
+
+  try
+    try
+      UpdateBaseProperties(APanel, PropertiesOrEvents, ADynTFTVirtualTable^.BaseProps);
+      PrepareVirtualTable(PropertiesOrEvents, SchemaConstants, ColorConstants, ADynTFTVirtualTable);
+
+      DynTFTDrawVirtualTable(ADynTFTVirtualTable, True);
+    except
+      on EE: Exception do
+      begin
+        try
+          DynTFT_Set_Pen(CL_LIGHTGRAY, 1);
+          DynTFT_Set_Brush(1, clCream, 0, 0, 0, 0);
+          DynTFT_Rectangle(0, 0, APanel.Width - 1, APanel.Height - 1);
+
+          DynTFT_Set_Font(PDynTFTListBox(ADynTFTVirtualTable^.Columns.Content^[0])^.Items^.ActiveFont, CL_GREEN, FO_HORIZONTAL);
+          DynTFT_Write_Text('Ex on drawing VirtualTable', 2, 3);
+        except
+          on E: Exception do
+            raise Exception.Create('VirtualTable is still in work (' + E.Message + ')  EE="' + EE.Message + '"');
+        end;
+      end;
+    end;
+  finally
+    try
+      DynTFTVirtualTable_Destroy(ADynTFTVirtualTable);
+    except                                                            ////////////// eventually, remove this exception handling
+      on E: Exception do
+        raise Exception.Create(E.Message + '  on DynTFTVirtualTable_Destroy');
+    end;
+  end;
+end;
+
+
 procedure RegisterAllComponentsEvents; stdcall;
 begin
   TFT_Init(1000, 1000);
   MM_Init;
+  DynTFT_AssignDebugConsole(frmImg.memLog);
+
   DynTFTInitComponentTypeRegistration;
   DynTFTInitComponentContainers;
   UseTFTTrueColor := True;
-  DynTFT_AssignDebugConsole(frmImg.memLog);
-
+  
   frmImg.Caption := 'DynTFT System Plugin';
   {$IFDEF FPC}
     frmImg.Caption := frmImg.Caption + ' (FP)';
@@ -1178,6 +1247,7 @@ begin
   DynTFTRegisterTrackBarEvents;            // {$IFDEF IsDesktop}DynTFT_DebugConsole('TrackBar type: ' + IntToStr(DynTFTGetTrackBarComponentType));{$ENDIF}
   DynTFTRegisterProgressBarEvents;         // {$IFDEF IsDesktop}DynTFT_DebugConsole('ProgressBar type: ' + IntToStr(DynTFTGetProgressBarComponentType));{$ENDIF}
   DynTFTRegisterMessageBoxEvents;          // {$IFDEF IsDesktop}DynTFT_DebugConsole('MessageBox type: ' + IntToStr(DynTFTGetMessageBoxComponentType));{$ENDIF}
+  DynTFTRegisterVirtualTableEvents;        // {$IFDEF IsDesktop}DynTFT_DebugConsole('VirtualTable type: ' + IntToStr(DynTFTGetVirtualTableComponentType));{$ENDIF}
 
   RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_Button);
   RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_ArrowButton);
@@ -1198,6 +1268,7 @@ begin
   RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_TrackBar);
   RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_ProgressBar);
   RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_MessageBox);
+  RegisterCompDrawingProcedure(FCompDrawingProcedures, TDrawDynTFTComponentProc_VirtualTable);
 end;
 
 

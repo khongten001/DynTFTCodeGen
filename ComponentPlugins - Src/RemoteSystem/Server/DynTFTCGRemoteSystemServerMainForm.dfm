@@ -1,20 +1,39 @@
 object frmDynTFTCGRemoteSystemServerMain: TfrmDynTFTCGRemoteSystemServerMain
-  Left = 387
-  Height = 347
-  Top = 43
-  Width = 600
+  Left = 0
+  Top = 0
   Caption = 'DynTFT CG Remote System Server'
-  ClientHeight = 347
-  ClientWidth = 600
+  ClientHeight = 299
+  ClientWidth = 635
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
   OnClose = FormClose
   OnCreate = FormCreate
-  LCLVersion = '7.5'
+  DesignSize = (
+    635
+    299)
+  PixelsPerInch = 96
+  TextHeight = 13
+  object lblAllocatedMemory: TLabel
+    Left = 8
+    Top = 253
+    Width = 89
+    Height = 13
+    Anchors = [akLeft, akBottom]
+    Caption = 'Allocated Memory:'
+    ParentShowHint = False
+    ShowHint = True
+  end
   object memLog: TMemo
     Left = 8
-    Height = 265
     Top = 24
     Width = 584
-    Anchors = [akTop, akLeft, akRight, akBottom]
+    Height = 202
+    Anchors = [akLeft, akTop, akRight, akBottom]
     ReadOnly = True
     ScrollBars = ssBoth
     TabOrder = 0
@@ -22,22 +41,12 @@ object frmDynTFTCGRemoteSystemServerMain: TfrmDynTFTCGRemoteSystemServerMain
   end
   object prbAllocatedMemory: TProgressBar
     Left = 8
-    Height = 17
-    Top = 320
+    Top = 272
     Width = 257
-    Anchors = [akLeft]
+    Height = 17
+    Anchors = [akLeft, akBottom]
     Smooth = True
     TabOrder = 1
-  end
-  object lblAllocatedMemory: TLabel
-    Left = 8
-    Height = 15
-    Top = 296
-    Width = 101
-    Anchors = [akLeft]
-    Caption = 'Allocated Memory:'
-    ParentShowHint = False
-    ShowHint = True
   end
   object IdTCPServer1: TIdTCPServer
     Bindings = <>
@@ -73,7 +82,7 @@ object frmDynTFTCGRemoteSystemServerMain: TfrmDynTFTCGRemoteSystemServerMain
     Enabled = False
     Interval = 100
     OnTimer = tmrStatsTimer
-    Left = 476
-    Top = 84
+    Left = 448
+    Top = 56
   end
 end

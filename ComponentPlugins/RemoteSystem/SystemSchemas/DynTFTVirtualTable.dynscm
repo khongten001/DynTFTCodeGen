@@ -1,0 +1,136 @@
+[ComponentPropertiesSchema]
+Count=9
+Prop_0_Name=Items_Font_Color
+Prop_0_DataType=TColor
+Prop_0_DefaultValue=CL_DynTFTItems_EnabledFont
+Prop_0_Description=Component font color
+Prop_0_AvailableOnCompilerDirectives=
+Prop_0_DesignTimeOnly=1
+Prop_1_Name=Items^.BackgroundColor
+Prop_1_DataType=TColor
+Prop_1_DefaultValue=CL_DynTFTItems_Background
+Prop_1_Description=Component color
+Prop_1_AvailableOnCompilerDirectives=
+Prop_1_DesignTimeOnly=1
+Prop_2_Name=Items_ActiveFont
+Prop_2_DataType=PByte
+Prop_2_DefaultValue=@TFT_defaultFont
+Prop_2_Description=Component font
+Prop_2_AvailableOnCompilerDirectives=DynTFTFontSupport
+Prop_2_DesignTimeOnly=0
+Prop_3_Name=Preview_Items_Strings
+Prop_3_DataType=Array of String[CMaxItemItemCount]
+Prop_3_DefaultValue=
+Prop_3_Description=These are the displayed items.
+Prop_3_AvailableOnCompilerDirectives=not UseExternalItems
+Prop_3_DesignTimeOnly=1
+Prop_4_Name=DefaultItemHeight
+Prop_4_DataType=Word
+Prop_4_DefaultValue=16
+Prop_4_Description=Height in pixels of an item.
+Prop_4_AvailableOnCompilerDirectives=
+Prop_4_DesignTimeOnly=1
+Prop_5_Name=ItemIndex
+Prop_5_DataType=Integer
+Prop_5_DefaultValue=-1
+Prop_5_Description=Index of selected item
+Prop_5_AvailableOnCompilerDirectives=
+Prop_5_DesignTimeOnly=1
+Prop_6_Name=PreviewItemsCount
+Prop_6_DataType=Integer
+Prop_6_DefaultValue=0
+Prop_6_Description=Number of items. This property is internally computed and used at code generation. Do not manually edit it.
+Prop_6_AvailableOnCompilerDirectives=
+Prop_6_DesignTimeOnly=0
+Prop_6_ReadOnly=1
+Prop_7_Name=Items_VisibleIcons
+Prop_7_DataType=Boolean
+Prop_7_DefaultValue=False
+Prop_7_Description=When True, the OnDrawIcon event is triggered to draw the item icon. When False, only the item text is displayed.
+Prop_7_AvailableOnCompilerDirectives=ListIcons
+Prop_7_DesignTimeOnly=1
+Prop_8_Name=HeaderCaptions
+Prop_8_DataType=Array of String[CMaxItemItemCount]
+Prop_8_DefaultValue=
+Prop_8_Description=These are the column titles.
+Prop_8_AvailableOnCompilerDirectives=
+Prop_8_DesignTimeOnly=1
+
+[ComponentPropertiesOverrides]
+Count=2
+Prop_0_Name=Width
+Prop_0_DefaultValue=100
+Prop_1_Name=Height
+Prop_1_DefaultValue=170
+
+[ComponentEventsPropertiesSchema]
+Count=3
+Prop_0_Name=OnGetItem
+Prop_0_DataType=POnGetItemEvent
+Prop_0_DefaultValue=
+Prop_0_Description=This is called to display every item on every paint action.
+Prop_0_AvailableOnCompilerDirectives=UseExternalItems
+Prop_0_DesignTimeOnly=0
+Prop_0_DataTypeDefinition=procedure _<HandlerName>_(AItems: PPtrRec; Index: LongInt; var ItemText: string);
+Prop_1_Name=OnGetItemVisibility
+Prop_1_DataType=POnGetItemVisibilityEvent
+Prop_1_DefaultValue=
+Prop_1_Description=This is called to override item visibility.
+Prop_1_AvailableOnCompilerDirectives=UseExternalItems
+Prop_1_DesignTimeOnly=0
+Prop_1_DataTypeDefinition=procedure _<HandlerName>_(AItems: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF});
+Prop_2_Name=OnDrawIcon
+Prop_2_DataType=POnDrawIconEvent
+Prop_2_DefaultValue=
+Prop_2_Description=This is called to draw an icon on every item, only if the VisibleIcons property is True. Usually, the icon coordinates are CIconIndent (as x) and ItemY (as Y).
+Prop_2_AvailableOnCompilerDirectives=ListIcons
+Prop_2_DesignTimeOnly=0
+Prop_2_DataTypeDefinition=procedure _<HandlerName>_(AItems: PPtrRec; Index, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF});
+
+[ComponentEventsOverrides]
+Count=0
+
+[Constants]
+Count=3
+Const_0_Name=CMaxItemsStringLength
+Const_0_DataType=Integer
+Const_0_Value=19
+Const_1_Name=CMaxItemItemCount
+Const_1_DataType=Integer
+Const_1_Value=16
+Const_2_Name=CIconIndent
+Const_2_DataType=Integer
+Const_2_Value=3
+
+[ColorConstants]
+Count=2
+Const_0_Name=CL_DynTFTItems_Background
+Const_0_DataType=TColor
+Const_0_Value=CL_WHITE
+Const_1_Name=CL_DynTFTItems_EnabledFont
+Const_1_DataType=TColor
+Const_1_Value=CL_BLACK
+
+[OneTimeComponentInitCode]
+Count=0
+
+[PerInstanceInitConstants]
+Count=0
+
+[PerInstanceInitCode]
+Count=0
+
+[CreateComponentCode]
+Count=1
+Line_0=_<ObjectName>_ := DynTFTVirtualTable_Create(_<ScreenIndex>_, _<Left>_, _<Top>_, _<Width>_, _<Height>_);
+
+[ComponentDependencies]
+Count=4
+Comp_0_Name=DynTFTItems
+Comp_1_Name=DynTFTScrollBar
+Comp_2_Name=DynTFTArrowButton
+Comp_3_Name=DynTFTListBox
+
+[ComponentRegistration]
+RegisterEvents=DynTFTRegisterVirtualTableEvents
+GetComponentType=DynTFTGetVirtualTableComponentType

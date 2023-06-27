@@ -95,7 +95,7 @@ uses
 
 const
   CPluginName = 'System Components';  //the same string is used in color themes which target a specific plugin
-  CComponentCount = 19;
+  CComponentCount = 20;
 
 
 procedure SendPlainStringToServer(s: string);
@@ -309,6 +309,9 @@ begin
     AStringList.Add('DynTFTTrackBar');
     AStringList.Add('DynTFTProgressBar');
     AStringList.Add('DynTFTMessageBox');
+    AStringList.Add('DynTFTVirtualTable');
+
+    //the CComponentCount constant has to be updated when adding components
 
     ResultStr := AStringList.Text;      //CRLF separated component names
     Result := SetPointedContentFromString(ResultStr, AListOfComponents);
@@ -346,6 +349,9 @@ begin
     AStringList.Add('0'); //DynTFTTrackBar
     AStringList.Add('0'); //DynTFTProgressBar
     AStringList.Add('1'); //DynTFTMessageBox
+    AStringList.Add('0'); //DynTFTVirtualTable
+
+    //the CComponentCount constant has to be updated when adding components
 
     ResultStr := AStringList.Text;        //CRLF separated component usage
     Result := SetPointedContentFromString(ResultStr, AListOfComponents);

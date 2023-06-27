@@ -868,6 +868,12 @@ begin
 end;
 
 
+procedure TDrawDynTFTComponentProc_VirtualTable(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
+begin
+  DrawDynTFTComponentProc(APanel, CCGRM_DrawPDynTFTComponentOnPanel_VirtualTable, PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
+end;
+
+
 procedure RegisterAllComponentsEvents; stdcall;
 begin
   RegisterCompDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_Button);
@@ -889,6 +895,7 @@ begin
   RegisterCompDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_TrackBar);
   RegisterCompDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_ProgressBar);
   RegisterCompDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_MessageBox);
+  RegisterCompDrawingProcedure(FDrawingProcedures, TDrawDynTFTComponentProc_VirtualTable);
 end;
 
 

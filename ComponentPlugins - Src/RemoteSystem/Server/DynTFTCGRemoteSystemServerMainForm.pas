@@ -1,5 +1,5 @@
 {   DynTFT  - graphic components for microcontrollers
-    Copyright (C) 2017, 2022 VCC
+    Copyright (C) 2017, 2023 VCC
     initial release date: 29 Dec 2017
     author: VCC
 
@@ -38,14 +38,17 @@
 
 unit DynTFTCGRemoteSystemServerMainForm;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+  {$mode objfpc}{$H+}
+{$ENDIF}
 
 interface
 
 uses
   Types,
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  IdTCPServer, IdSync, IdCustomTCPServer, IdContext, IdTCPClient;
+  IdTCPServer, IdSync, IdCustomTCPServer, IdContext, IdTCPClient,
+  IdBaseComponent, IdComponent, ComCtrls;
 
 type
 
@@ -57,12 +60,16 @@ type
     tmrPrepareClient: TTimer;
     tmrCloseClient: TTimer;
     tmrStartup: TTimer;
+    lblAllocatedMemory: TLabel;
+    prbAllocatedMemory: TProgressBar;
+    tmrStats: TTimer;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure IdTCPServer1Execute(AContext: TIdContext);
     procedure tmrCloseClientTimer(Sender: TObject);
     procedure tmrPrepareClientTimer(Sender: TObject);
     procedure tmrStartupTimer(Sender: TObject);
+    procedure tmrStatsTimer(Sender: TObject);
   private
     procedure AddToLog(s: string);
     procedure AddToLogFromThread(s: string);
@@ -94,12 +101,17 @@ var
 
 implementation
 
-{$R *.frm}
+{$IFDEF FPC}
+  {$R *.frm}
+{$ELSE}
+  {$R *.dfm}
+{$ENDIF}
 
 
 uses
   RemoteSystemCommands, IdIOHandlerSocket, ComponentIcons, DynTFTPluginUtils, PanelDrawing,
-  DynTFTCodeGenSharedDataTypes, TFT, DynTFTSharedUtils, DynTFTColorThemeGenLiveColors;
+  DynTFTCodeGenSharedDataTypes, TFT, DynTFTSharedUtils, DynTFTColorThemeGenLiveColors,
+  MemManager, DynTFTBaseDrawing;
 
 
 const
@@ -489,7 +501,7 @@ begin
     end;
   except
     on E: Exception do
-      frmDynTFTCGRemoteSystemServerMain.AddToLogFromThread('Ex in DrawPDynTFTComponentOnPanel: ' + E.Message);
+      frmDynTFTCGRemoteSystemServerMain.AddToLogFromThread('Ex in DrawPDynTFTComponentOnPanel: "' + E.Message + '".  Component type: ' + IntToStr(TempPanelBase.DynTFTComponentType));
   end;
 end;
 
@@ -506,8 +518,8 @@ var
   Res: string;
 begin
   Res := CDPDynTFT_Set_Pen + CDrawingCmdFieldSeparator +
-         'pen_color=' + IntToHex(pen_color) + CDrawingCmdFieldSeparator +
-         'pen_width=' + IntToHex(pen_width);
+         'pen_color=' + IntToHex(pen_color, 6) + CDrawingCmdFieldSeparator +
+         'pen_width=' + IntToHex(pen_width, 2);
 
   AddDrawingCommand(Res);
 end;
@@ -518,12 +530,12 @@ var
   Res: string;
 begin
   Res := CDPDynTFT_Set_Brush + CDrawingCmdFieldSeparator +
-         'brush_enabled=' + IntToHex(brush_enabled) + CDrawingCmdFieldSeparator +
-         'brush_color=' + IntToHex(brush_color) + CDrawingCmdFieldSeparator +
-         'gradient_enabled=' + IntToHex(gradient_enabled) + CDrawingCmdFieldSeparator +
-         'gradient_orientation=' + IntToHex(gradient_orientation) + CDrawingCmdFieldSeparator +
-         'gradient_color_from=' + IntToHex(gradient_color_from) + CDrawingCmdFieldSeparator +
-         'gradient_color_to=' + IntToHex(gradient_color_to);
+         'brush_enabled=' + IntToHex(brush_enabled, 1) + CDrawingCmdFieldSeparator +
+         'brush_color=' + IntToHex(brush_color, 6) + CDrawingCmdFieldSeparator +
+         'gradient_enabled=' + IntToHex(gradient_enabled, 1) + CDrawingCmdFieldSeparator +
+         'gradient_orientation=' + IntToHex(gradient_orientation, 1) + CDrawingCmdFieldSeparator +
+         'gradient_color_from=' + IntToHex(gradient_color_from, 6) + CDrawingCmdFieldSeparator +
+         'gradient_color_to=' + IntToHex(gradient_color_to, 6);
 
   AddDrawingCommand(Res);
 end;
@@ -543,8 +555,8 @@ begin
 
     Res := CDPDynTFT_Set_Font + CDrawingCmdFieldSeparator +
            'activeFont=' + FontAddress + CDrawingCmdFieldSeparator +
-           'font_color=' + IntToHex(font_color) + CDrawingCmdFieldSeparator +
-           'font_orientation=' + IntToHex(font_orientation);
+           'font_color=' + IntToHex(font_color, 6) + CDrawingCmdFieldSeparator +
+           'font_orientation=' + IntToHex(font_orientation, 1);
 
     try
       TempWorkCanvas.Lock;
@@ -593,8 +605,8 @@ var
 begin
   Res := CDPDynTFT_Write_Text + CDrawingCmdFieldSeparator +
          'AText=' + AText + CDrawingCmdFieldSeparator +
-         'x=' + IntToHex(x) + CDrawingCmdFieldSeparator +
-         'y=' + IntToHex(y);
+         'x=' + IntToHex(x, 1) + CDrawingCmdFieldSeparator +
+         'y=' + IntToHex(y, 1);
 
   AddDrawingCommand(Res);
 end;
@@ -605,10 +617,10 @@ var
   Res: string;
 begin
   Res := CDPDynTFT_Line + CDrawingCmdFieldSeparator +
-         'x1=' + IntToHex(x1) + CDrawingCmdFieldSeparator +
-         'y1=' + IntToHex(y1) + CDrawingCmdFieldSeparator +
-         'x2=' + IntToHex(x2) + CDrawingCmdFieldSeparator +
-         'y2=' + IntToHex(y2);
+         'x1=' + IntToHex(x1, 1) + CDrawingCmdFieldSeparator +
+         'y1=' + IntToHex(y1, 1) + CDrawingCmdFieldSeparator +
+         'x2=' + IntToHex(x2, 1) + CDrawingCmdFieldSeparator +
+         'y2=' + IntToHex(y2, 1);
 
   AddDrawingCommand(Res);
 end;
@@ -619,9 +631,9 @@ var
   Res: string;
 begin
   Res := CDPDynTFT_H_Line + CDrawingCmdFieldSeparator +
-         'x_start=' + IntToHex(x_start) + CDrawingCmdFieldSeparator +
-         'x_end=' + IntToHex(x_end) + CDrawingCmdFieldSeparator +
-         'y_pos=' + IntToHex(y_pos);
+         'x_start=' + IntToHex(x_start, 1) + CDrawingCmdFieldSeparator +
+         'x_end=' + IntToHex(x_end, 1) + CDrawingCmdFieldSeparator +
+         'y_pos=' + IntToHex(y_pos, 1);
 
   AddDrawingCommand(Res);
 end;
@@ -632,9 +644,9 @@ var
   Res: string;
 begin
   Res := CDPDynTFT_V_Line + CDrawingCmdFieldSeparator +
-         'y_start=' + IntToHex(y_start) + CDrawingCmdFieldSeparator +
-         'y_end=' + IntToHex(y_end) + CDrawingCmdFieldSeparator +
-         'x_pos=' + IntToHex(x_pos);
+         'y_start=' + IntToHex(y_start, 1) + CDrawingCmdFieldSeparator +
+         'y_end=' + IntToHex(y_end, 1) + CDrawingCmdFieldSeparator +
+         'x_pos=' + IntToHex(x_pos, 1);
 
   AddDrawingCommand(Res);
 end;
@@ -645,9 +657,9 @@ var
   Res: string;
 begin
   Res := CDPDynTFT_Dot + CDrawingCmdFieldSeparator +
-         'x=' + IntToHex(x) + CDrawingCmdFieldSeparator +
-         'y=' + IntToHex(y) + CDrawingCmdFieldSeparator +
-         'Color=' + IntToHex(Color);
+         'x=' + IntToHex(x, 1) + CDrawingCmdFieldSeparator +
+         'y=' + IntToHex(y, 1) + CDrawingCmdFieldSeparator +
+         'Color=' + IntToHex(Color, 6);
 
   AddDrawingCommand(Res);
 end;
@@ -658,7 +670,7 @@ var
   Res: string;
 begin
   Res := CDPDynTFT_Fill_Screen + CDrawingCmdFieldSeparator +
-         'Color=' + IntToHex(color);
+         'Color=' + IntToHex(color, 6);
 
   AddDrawingCommand(Res);
 end;
@@ -669,10 +681,10 @@ var
   Res: string;
 begin
   Res := CDPDynTFT_Rectangle + CDrawingCmdFieldSeparator +
-         'x_upper_left=' + IntToHex(x_upper_left) + CDrawingCmdFieldSeparator +
-         'y_upper_left=' + IntToHex(y_upper_left) + CDrawingCmdFieldSeparator +
-         'x_bottom_right=' + IntToHex(x_bottom_right) + CDrawingCmdFieldSeparator +
-         'y_bottom_right=' + IntToHex(y_bottom_right);
+         'x_upper_left=' + IntToHex(x_upper_left, 1) + CDrawingCmdFieldSeparator +
+         'y_upper_left=' + IntToHex(y_upper_left, 1) + CDrawingCmdFieldSeparator +
+         'x_bottom_right=' + IntToHex(x_bottom_right, 1) + CDrawingCmdFieldSeparator +
+         'y_bottom_right=' + IntToHex(y_bottom_right, 1);
 
   AddDrawingCommand(Res);
 end;
@@ -683,9 +695,9 @@ var
   Res: string;
 begin
   Res := CDPDynTFT_Circle + CDrawingCmdFieldSeparator +
-         'x_center=' + IntToHex(x_center) + CDrawingCmdFieldSeparator +
-         'y_center=' + IntToHex(y_center) + CDrawingCmdFieldSeparator +
-         'radius=' + IntToHex(radius);
+         'x_center=' + IntToHex(x_center, 1) + CDrawingCmdFieldSeparator +
+         'y_center=' + IntToHex(y_center, 1) + CDrawingCmdFieldSeparator +
+         'radius=' + IntToHex(radius, 1);
 
   AddDrawingCommand(Res);
 end;
@@ -744,9 +756,9 @@ var
   MemStream: TMemoryStream;
 begin
   Res := CDPDynTFT_DrawBitmap + CDrawingCmdFieldSeparator +
-         'AContentSize=' + IntToHex(AContentSize) + CDrawingCmdFieldSeparator +
-         'x=' + IntToHex(x) + CDrawingCmdFieldSeparator + CDrawingCmdFieldSeparator +
-         'y=' + IntToHex(y);
+         'AContentSize=' + IntToHex(AContentSize, 1) + CDrawingCmdFieldSeparator +
+         'x=' + IntToHex(x, 1) + CDrawingCmdFieldSeparator + CDrawingCmdFieldSeparator +
+         'y=' + IntToHex(y, 1);
 
   MemStream := TMemoryStream.Create;
   try
@@ -1085,6 +1097,30 @@ begin
   AddToLogFromThread('Registered ' + IntToStr(Length(FDrawingProcedures)) + ' components.');
 
   Handle_RegisterDynTFTDrawingProcedures;
+
+  prbAllocatedMemory.Max := {$IFDEF UseSmallMM} MaxMM {$ELSE} HEAP_SIZE {$ENDIF};
+  lblAllocatedMemory.Hint := 'Available: ' + IntToStr(prbAllocatedMemory.Max) + ' Bytes';
+
+  tmrStats.Enabled := True;  
+end;
+
+
+procedure TfrmDynTFTCGRemoteSystemServerMain.tmrStatsTimer(Sender: TObject);
+var
+  AllocatedMemSize: Integer;
+begin
+  AllocatedMemSize := {$IFDEF UseSmallMM} MaxMM {$ELSE} HEAP_SIZE {$ENDIF} - MM_TotalFreeMemSize;
+  if prbAllocatedMemory.Position <> AllocatedMemSize then
+  begin
+    prbAllocatedMemory.Position := AllocatedMemSize;
+    lblAllocatedMemory.Caption := 'Allocated Memory: ' + IntToStr(AllocatedMemSize) + ' B    (' + IntToStr(AllocatedMemSize shr 10) + ' KB)';
+  end;
+
+  if MM_error then
+  begin
+    lblAllocatedMemory.Font.Color := clRed;
+    lblAllocatedMemory.Font.Style := [fsBold];
+  end;
 end;
 
 end.

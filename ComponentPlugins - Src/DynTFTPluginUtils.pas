@@ -208,7 +208,13 @@ begin
       for i := 0 to AFontSettings.Len - 1 do
         TempFontSettings[i] := TFontSettings(Pointer(QWord(AFontSettings.AddrOfFirst) + i * SizeOf(TFontSettings))^);
 
-      ACompDrawingProcedures[APanelBase.DynTFTComponentType](APanelBase, TempPropertiesOrEvents, TempSchemaConstants, TempColorConstants, TempFontSettings);
+      try
+        ACompDrawingProcedures[APanelBase.DynTFTComponentType](APanelBase, TempPropertiesOrEvents, TempSchemaConstants, TempColorConstants, TempFontSettings)
+      except
+        raise Exception.Create('Drawing procedure not assigned.' + #13#10 +
+                               'Is the component properly registered in RegisterAllComponentsEvents?' + #13#10 +
+                               'If this compoenent is part of a remote plugin, is the server available?');
+      end;
 
       //there may be components with modified properties, as a result of calls to UpdateComponentPropertyByName
       TempPropertiesOrEventsRef.Len := Length(TempPropertiesOrEvents);

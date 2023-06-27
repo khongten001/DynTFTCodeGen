@@ -81,6 +81,7 @@ const
   CCGRM_DrawPDynTFTComponentOnPanel_TrackBar = CCGRM_DrawPDynTFTComponentOnPanelPrefix + 'TrackBar';
   CCGRM_DrawPDynTFTComponentOnPanel_ProgressBar = CCGRM_DrawPDynTFTComponentOnPanelPrefix + 'ProgressBar';
   CCGRM_DrawPDynTFTComponentOnPanel_MessageBox = CCGRM_DrawPDynTFTComponentOnPanelPrefix + 'MessageBox';
+  CCGRM_DrawPDynTFTComponentOnPanel_VirtualTable = CCGRM_DrawPDynTFTComponentOnPanelPrefix + 'VirtualTable';
 
   //DynTFT drawing primitives
   CDPDynTFT_Set_Pen = '0';
