@@ -110,6 +110,19 @@ begin
 end;
 
 
+procedure VTItemsOnGetItem(AComp: PPtrRec; Index, Column: LongInt; var ItemText: string);
+begin
+  if Index < 0 then
+  begin
+    ItemText := 'out: ' + IntToStr(Index);  //debugging info
+    Exit;
+  end;
+
+  if Items_Content.Count > 0 then
+    ItemText := Items_Content.Strings[Index] + ' ' + IntToStr(Column);
+end;
+
+
 procedure ItemsOnGetItemVisibility(AComp: PPtrRec; Index: LongInt; var ItemText: string {$IFDEF ItemsVisibility}; IsVisible: PBoolean {$ENDIF} {$IFDEF ItemsEnabling}; IsEnabled: PBoolean {$ENDIF});
 begin
   if Index < 0 then
@@ -139,6 +152,12 @@ begin
   DynTFT_Set_Pen(CL_OLIVE, 1);
   DynTFT_Line(IconLeft, ItemY, IconLeft + TempItemHeight - 5, ItemY + 3);
   DynTFT_V_Line(ItemY + 3, ItemY + TempItemHeight, IconLeft + TempItemHeight - 5 - 1);
+end;
+
+
+procedure VTItemsOnDrawIcon(AItems: PPtrRec; Index, Column, ItemY: LongInt; var ItemText: string {$IFDEF ItemsEnabling}; IsEnabled: Boolean {$ENDIF});
+begin
+  ItemsOnDrawIcon(AItems, Index, ItemY {- (Column and 1) shl 1}, ItemText, {$IFDEF ItemsEnabling} IsEnabled {$ENDIF});
 end;
 
 
@@ -457,23 +476,51 @@ begin
 end;
 
 
-procedure PrepareVirtualTable(var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; ADynTFTVirtualTable: PDynTFTVirtualTable);
+procedure PrepareVirtualTable(var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr; ADynTFTVirtualTable: PDynTFTVirtualTable);
 var
   i: Integer;
   LocalHeaderItems: TStringList;
+  ColumnWidths: TStringList;
+  TempListBox: PDynTFTListBox;
+  TempPanel: PDynTFTPanel;
 begin
   ADynTFTVirtualTable^.BaseProps.Enabled := StrToIntDef(GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'Enabled'), 1);
   ADynTFTVirtualTable^.VertScrollBar^.BaseProps.Enabled := StrToIntDef(GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'Enabled'), 1);
   ADynTFTVirtualTable^.HorizScrollBar^.BaseProps.Enabled := StrToIntDef(GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'Enabled'), 1);
 
+  TempListBox := PDynTFTListBox(ADynTFTVirtualTable^.Columns^.Content[0]);
+  PrepareItems(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings, TempListBox^.Items, 'Items^.');
+
   LocalHeaderItems := TStringList.Create;
   try
     LocalHeaderItems.Text := GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'HeaderCaptions');
-    for i := 1 to LocalHeaderItems.Count - 1 do //starts at 1, because there is already a first column
-      DynTFTAddColumnToVirtualTable(ADynTFTVirtualTable);
 
-    for i := 0 to LocalHeaderItems.Count - 1 do
-      PDynTFTPanel(ADynTFTVirtualTable^.HeaderItems.Content^[i]).Caption := LocalHeaderItems.Strings[i];
+    ////////////////////////////////  a similar for loop must be defined in schema file at component initialization / implementation, to actually create the columns
+    for i := 1 to LocalHeaderItems.Count - 1 do //starts at 1, because there is already a first column
+    begin
+      TempListBox := DynTFTAddColumnToVirtualTable(ADynTFTVirtualTable);
+      PrepareItems(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings, TempListBox^.Items, 'Items^.');
+    end;
+
+    ColumnWidths := TStringList.Create;
+    try
+      ColumnWidths.Text := GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'ColumnWidths');
+
+      for i := 0 to LocalHeaderItems.Count - 1 do
+      begin
+        TempPanel := PDynTFTPanel(ADynTFTVirtualTable^.HeaderItems.Content^[i]);
+        TempPanel.Caption := LocalHeaderItems.Strings[i];
+
+        try
+          TempPanel.BaseProps.Width := StrToIntDef(ColumnWidths.Strings[i], 7);
+        except //there may be AV, if the user did not define all column widths
+          TempPanel.BaseProps.Width := 120;
+          TempPanel.Caption := 'Undefined width';
+        end;
+      end;
+    finally
+      ColumnWidths.Free;
+    end;
   finally
     LocalHeaderItems.Free;
   end;
@@ -1171,7 +1218,8 @@ end;
 procedure TDrawDynTFTComponentProc_VirtualTable(APanel: TUIPanelBase; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 var
   ADynTFTVirtualTable: PDynTFTVirtualTable;
-  //TempFirstListBox: PDynTFTListBox;
+  TempListBox: PDynTFTListBox;
+  i: Integer;
 begin
   try
     ADynTFTVirtualTable := DynTFTVirtualTable_Create(0, 0, 0, 100, 170);
@@ -1183,9 +1231,39 @@ begin
   try
     try
       UpdateBaseProperties(APanel, PropertiesOrEvents, ADynTFTVirtualTable^.BaseProps);
-      PrepareVirtualTable(PropertiesOrEvents, SchemaConstants, ColorConstants, ADynTFTVirtualTable);
 
-      DynTFTDrawVirtualTable(ADynTFTVirtualTable, True);
+      Items_Content := TStringList.Create;
+      Items_Visibility := TStringList.Create;
+      Items_Enabling := TStringList.Create;
+      try
+        PrepareVirtualTable(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings, ADynTFTVirtualTable);
+
+        for i := 0 to ADynTFTVirtualTable^.Columns.Len - 1 do
+        begin
+          TempListBox := PDynTFTListBox(ADynTFTVirtualTable^.Columns.Content^[i]);
+
+          UpdateComponentPropertyByName(PropertiesOrEvents, 'Items^.Count', IntToStr(TempListBox^.Items^.Count));
+          UpdateComponentPropertyByName(PropertiesOrEvents, 'Items^.TotalVisibleCount', IntToStr(TempListBox^.Items^.TotalVisibleCount));
+        end;
+
+        for i := 0 to ADynTFTVirtualTable^.Columns.Len - 1 do
+        begin
+          TempListBox := PDynTFTListBox(ADynTFTVirtualTable^.Columns.Content^[i]);
+
+          //TempListBox^.Items^.OnGetItem^ := ItemsOnGetItem;           //do not set Items^.OnGetItem^, because it is used internally by the VirtualTable
+          TempListBox^.Items^.OnGetItemVisibility^ := ItemsOnGetItemVisibility;
+          //TempListBox^.Items^.OnDrawIcon^ := ItemsOnDrawIcon;         //do not set Items^.OnDrawIcon^, because it is used internally by the VirtualTable
+
+          ADynTFTVirtualTable^.OnGetItem^ := VTItemsOnGetItem;
+          ADynTFTVirtualTable^.OnDrawIcon^ := VTItemsOnDrawIcon;
+        end;
+
+        DynTFTDrawVirtualTable(ADynTFTVirtualTable, True);
+      finally
+        Items_Content.Free;
+        Items_Visibility.Free;
+        Items_Enabling.Free;
+      end;
     except
       on EE: Exception do
       begin
