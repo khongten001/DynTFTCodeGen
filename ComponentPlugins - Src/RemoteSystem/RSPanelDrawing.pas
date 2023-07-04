@@ -40,9 +40,10 @@ unit RSPanelDrawing;
 
 {ToDo
 
-[in work] - Fix various synchronizations inssues (client-server race conditions)
-  - includes drawing a component over another (because there is no synchronization between draing components and drawing primitives)
-- Implement modifying properties by plugin  (requires the server to implement sending back the list of properties)
+[in work] - Fix various synchronizations issues (client-server race conditions)
+  - includes drawing a component over another (because there is no synchronization between drawing components and drawing primitives).  Currently, drawing the primitives (in exe) is done from a separate thread (see ReadDrawingCommands below).
+  - maybe the primitives functions should have a way to identify the components they draw onto
+[done] - Implement modifying properties by plugin  (requires the server to implement sending back the list of properties)
   This is needed to properly generate code for components like Items, ListBox, RadioGroup, PageControl.
 [in work] - Implement a timer for verifying (pinging) server connection and automatically reconnect if disconnected
 - Optimize the client-server API to send as less redundant data as possible. For example, color constants might be sent once.
@@ -93,78 +94,48 @@ implementation
 uses
   DynTFTCGRemoteSystemExportedFunctions, RemoteSystemCommands, DynTFTPluginUtils,
   TFTCallbacks, DynTFTUtils, Graphics, DynTFTSharedUtils, DynTFTCodeGenImgFormRS,
-  IdSync, IdCustomTCPServer, IdContext, IdIOHandlerSocket, IdException,
+  IdCustomTCPServer, IdContext, IdIOHandlerSocket, IdException,
+  //IdSync,
   IdGlobal
   ;
 
-type
-  TSyncLogObj = class(TIdSync)
-  private
-    FMsg: string;
-    FDisplayConsole: Boolean;
-  protected
-    procedure DoSynchronize; override;
-  end;
-
-  TSyncUIObj = class(TIdSync)    //only to have a dummy UI sync
-  protected
-    procedure DoSynchronize; override;
-  end;
-
-  TSyncReadDrawingCommandsObj = class(TIdSync)
-  private
-    FSocket: TIdIOHandlerSocket;
-    FCmdParam: string;
-  protected
-    procedure DoSynchronize; override;
-  end;
+//type
+//
+//  TSyncUIObj = class(TIdSync)    //only to have a dummy UI sync
+//  protected
+//    procedure DoSynchronize; override;
+//  end;
+//
+//  TSyncReadDrawingCommandsObj = class(TIdSync)
+//  private
+//    FSocket: TIdIOHandlerSocket;
+//    FCmdParam: string;
+//  protected
+//    procedure DoSynchronize; override;
+//  end;
 
 var
   FDrawingProcedures: TDrawDynTFTComponentProcArr;
   FtmrCheckConnection: TTimer;
 
 
-procedure TSyncLogObj.DoSynchronize;
-begin
-  DynTFT_DebugConsole(FMsg);
-
-  if FDisplayConsole and not frmImg.Visible then
-    frmImg.Show;
-end;
-
-
-procedure AddToLogFromThread(s: string; ADisplayConsole: Boolean = False);
-var
-  SyncObj: TSyncLogObj;
-begin
-  SyncObj := TSyncLogObj.Create;
-  try
-    SyncObj.FMsg := s;
-    SyncObj.FDisplayConsole := ADisplayConsole;
-    SyncObj.Synchronize;
-  finally
-    SyncObj.Free;
-  end;
-end;
-
-
-procedure TSyncUIObj.DoSynchronize;
-begin
-  SendMessage(frmImg.Handle, 1024 {WM_USER}, 0, 0);   //not fully effective
-end;
-
-
-procedure SyncThreadToUI;
-var
-  SyncObj: TSyncUIObj;
-begin
-  SyncObj := TSyncUIObj.Create;
-  try
-    SyncObj.Synchronize;
-  finally
-    SyncObj.Free;
-  end;
-end;
+//procedure TSyncUIObj.DoSynchronize;
+//begin
+//  SendMessage(frmImg.Handle, 1024 {WM_USER}, 0, 0);   //not fully effective
+//end;
+//
+//
+//procedure SyncThreadToUI;
+//var
+//  SyncObj: TSyncUIObj;
+//begin
+//  SyncObj := TSyncUIObj.Create;
+//  try
+//    SyncObj.Synchronize;
+//  finally
+//    SyncObj.Free;
+//  end;
+//end;
 
 
 function EncodePanelBasePropertiesToString(APanel: TUIPanelBase): string;
@@ -253,7 +224,7 @@ begin
     SendPlainStringToServer(FontSettings);
   except
     on E: Exception do
-      DynTFT_DebugConsole('Ex in SendComponentDataToServer: ' + E.Message);
+      frmImg.AddToLog('Ex in SendComponentDataToServer: ' + E.Message);
   end;
 end;
 
@@ -493,14 +464,14 @@ begin
   AStringList := TStringList.Create;
   try
     AStringList.Text := CmdParam;
-    AText := AStringList.Values['AText'];              //AddToLogFromThread('Do_GetTextWidthAndHeight_Callback: ' + AText);
+    AText := AStringList.Values['AText'];              //frmImg.AddToLog('Do_GetTextWidthAndHeight_Callback: ' + AText);
 
     try
       FGetTextWidthAndHeight_Callback(AText, Width, Height);
     except
       on E: Exception do
       begin
-        AddToLogFromThread('Do_GetTextWidthAndHeight_Callback: ' + E.Message);
+        frmImg.AddToLog('Do_GetTextWidthAndHeight_Callback: ' + E.Message);
         frmImg.Show;
       end;
     end;
@@ -540,7 +511,7 @@ begin
 end;
 
 
-procedure ReadDrawingCommands(ASocket: TIdIOHandlerSocket; ACmdParam: string);
+procedure ReadDrawingCommands(ASocket: TIdIOHandlerSocket; ACmdParam: string);  //This is not thread safe, but it's the only way (currently) to call drawing primitives in time. If using UI synchronization, the drawing canvas at exe side, is not available anymore.
 var
   DrawingCmd: string;
   ListOfDrawingCommands: TStringList;
@@ -578,25 +549,57 @@ begin
 end;
 
 
-procedure TSyncReadDrawingCommandsObj.DoSynchronize;
-begin
-  ReadDrawingCommands(FSocket, FCmdParam);
-end;
-
-
-procedure ReadDrawingCommandsFromThread(ASocket: TIdIOHandlerSocket; ACmdParam: string);
+procedure ReadNewPropertyValues(ASocket: TIdIOHandlerSocket; ACmdParam: string; var PropertiesOrEvents: TDynTFTDesignPropertyArr);
 var
-  SyncObj: TSyncReadDrawingCommandsObj;
+  PropNameValues: TStringList;
+  i: Integer;
+  //PropIdx: Integer;
+  PropName, PropValue: string;
 begin
-  SyncObj := TSyncReadDrawingCommandsObj.Create;
+  ACmdParam := Replace45To1310(ACmdParam);    //#4#5 are the "exterior" separators
+  PropNameValues := TStringList.Create;
   try
-    SyncObj.FSocket := ASocket;
-    SyncObj.FCmdParam := ACmdParam;
-    SyncObj.Synchronize;
+    PropNameValues.Text := ACmdParam;
+
+    for i := 0 to PropNameValues.Count - 1 do
+    begin
+      PropName := PropNameValues.Names[i];
+      PropValue := PropNameValues.ValueFromIndex[i];
+      
+      UpdateComponentPropertyByName(PropertiesOrEvents, PropName, PropValue);
+
+//      PropIdx := GetPropertyIndexInPropertiesOrEventsByName(PropertiesOrEvents, PropName);   //code from UpdateComponentPropertyByName
+//      if (PropIdx > -1) and (PropIdx < Length(PropertiesOrEvents)) then
+//      begin
+//        PropertiesOrEvents[PropIdx].PropertyValue := PropValue;
+//        frmImg.AddToLog('Updating property "' + PropName + '" to ' + PropValue);
+//      end;
+    end;  
   finally
-    SyncObj.Free;
+    PropNameValues.Free;
   end;
 end;
+
+
+//procedure TSyncReadDrawingCommandsObj.DoSynchronize;
+//begin
+//  ReadDrawingCommands(FSocket, FCmdParam);
+//end;
+//
+//
+//procedure ReadDrawingCommandsFromThread(ASocket: TIdIOHandlerSocket; ACmdParam: string);
+//var
+//  SyncObj: TSyncReadDrawingCommandsObj;
+//begin
+//  SyncObj := TSyncReadDrawingCommandsObj.Create;
+//  try
+//    SyncObj.FSocket := ASocket;
+//    SyncObj.FCmdParam := ACmdParam;
+//    SyncObj.Synchronize;
+//  finally
+//    SyncObj.Free;
+//  end;
+//end;
 
 
 type
@@ -619,7 +622,7 @@ begin
   FIdTCPServer.ReuseSocket := rsTrue;
   FIdTCPServer.MaxConnections := 10;
   FIdTCPServer.Active := True;
-  DynTFT_DebugConsole('Listening on port ' + IntToStr(FIdTCPServer.DefaultPort) + '.');
+  frmImg.AddToLog('Listening on port ' + IntToStr(FIdTCPServer.DefaultPort) + '.');
 end;
 
 
@@ -677,23 +680,25 @@ begin
 
     if Cmd = '' then
     begin
-      //DynTFT_DebugConsole('Received empty drawing command.  Cmd = ' + Cmd);
+      //frmImg.AddToLog('Received empty drawing command.  Cmd = ' + Cmd);
       Exit;
     end;
 
     if Cmd = CCGRM_CallbackDraw then  //used for drawing bitmaps
     begin
       //SyncThreadToUI; //not as effective as DynTFT_DebugConsole, which writes to a TMemo
-      DynTFT_DebugConsole('CCGRM_CallbackDraw...'); //required, to avoid "Out of system resources." error message.   ToDo: fix this.
-      //DynTFT_DebugConsole('CCGRM_CallbackDraw... CmdParam = ' + CmdParam);
+      //DynTFT_DebugConsole('CCGRM_CallbackDraw...'); //required, to avoid "Out of system resources." error message.   - replaced by below call to frmImg.AddToLog
+      frmImg.AddToLog('CCGRM_CallbackDraw...');
+      //frmImg.AddToLog('CCGRM_CallbackDraw... CmdParam = ' + CmdParam);
       ReadDrawingCommands{FromThread}(AContext.Connection.Socket, CmdParam);    ///////////// if synchronizing using "FromThread", it seems the race condition is less likely to reproduce, but the CDPDynTFT_GetTextWidthAndHeight callback is not called when needed, because the UI is not available then. The UI becomes available after the call to the component's drawing procedure, which is too late.
+
       Exit;
     end;
 
     if Cmd = CCGRM_PluginStartup then
     begin
       AContext.Connection.Socket.WriteLn('Plugin is ready.');
-      {AddToLogFromThread}DynTFT_DebugConsole('RS server (back connection) available.');   //It's safe to call DynTFT_DebugConsole from thread, in Delphi only, and only if the log is a system component, which uses SendMessage to get/set content.
+      frmImg.AddToLog('RS server (back connection) available.');   //It's safe to call DynTFT_DebugConsole from thread, in Delphi only, and only if the log is a system component, which uses SendMessage to get/set content.
       Exit;
     end;
 
@@ -703,7 +708,7 @@ begin
       raise;
 
     on E: Exception do
-      AddToLogFromThread('Ex in callback server: ' + E.Message, True);
+      frmImg.AddToLog('Ex in callback server: ' + E.Message);
   end;
 end;
 
@@ -724,7 +729,7 @@ begin
           FIdTCPClient.ConnectTimeout := CPluginClientConnectTimeout;
         end;
         
-        DynTFT_DebugConsole('Connected to server for DynTFTCGSystem components.');
+        frmImg.AddToLog('Connected to server for DynTFTCGSystem components.');
         SendPluginStartupCommandToServer;
         SendPluginPortCommandToServer;
         SendPingCommandToServer;
@@ -741,14 +746,27 @@ end;
 
 procedure DrawDynTFTComponentProc(APanel: TUIPanelBase; CompType: string; var PropertiesOrEvents: TDynTFTDesignPropertyArr; var SchemaConstants: TComponentConstantArr; var ColorConstants: TColorConstArr; var AFontSettings: TFontSettingsArr);
 begin
-  SendCommandToServer(CompType, EncodePanelBasePropertiesToString(APanel));
-  SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
+  try
+    SendCommandToServer(CompType, EncodePanelBasePropertiesToString(APanel));
+    SendComponentDataToServer(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings);
+  except
+    on E: Exception do
+    begin
+      frmImg.AddToLog('Ex on sending cmd to server.  ' + CompType + ' callback ex: ' + E.Message);    // Please increase the value of CMaxLineLen, if a project with multiple components displays "Max line length exceeded."
+      raise
+    end;
+  end;
+
+  if FIdTCPClient.Socket = nil then
+    raise Exception.Create('Not connected to server.');
 
   try
     ReadDrawingCommands(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10, CDrawingCmdTimeout, CMaxLineLen));
+
+    ReadNewPropertyValues(FIdTCPClient.Socket, FIdTCPClient.Socket.ReadLn(#13#10, CDrawingCmdTimeout, CMaxLineLen), PropertiesOrEvents);
   except
     on E: Exception do
-      DynTFT_DebugConsole(CompType + ' callback ex: ' + E.Message);    // Please increase the value of CMaxLineLen, if a project with multiple components displays "Max line length exceeded."
+      frmImg.AddToLog(CompType + ' callback ex: ' + E.Message);    // Please increase the value of CMaxLineLen, if a project with multiple components displays "Max line length exceeded."
   end;
 end;
 
@@ -905,7 +923,19 @@ begin
     raise Exception.Create('UserTFTCommands compiler directive is not defined. Please use DynTFTCodeGen callbacks.');   //UserTFTCommands should be defined at project level. Please rebuild the project after that.
   {$ENDIF}
 
-  DrawPDynTFTComponentOnPanelBase(APanelBase, FDrawingProcedures, APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings, ASetPropertiesCallback);
+  try
+    DrawPDynTFTComponentOnPanelBase(APanelBase, FDrawingProcedures, APropertiesOrEvents, ASchemaConstants, AColorConstants, AFontSettings, ASetPropertiesCallback);
+  except
+    on E: Exception do
+    begin
+      FDynTFT_Set_Pen_Callback(clMaroon, 1);
+      FDynTFT_Set_Brush_Callback(1, clCream, 0, 0, 0, 0);
+      FDynTFT_Rectangle_Callback(0, 0, APanelBase.Width - 1, APanelBase.Height - 1);
+      FDynTFT_Write_Text_Callback('Ex on drawing comp type: ' + IntToStr(APanelBase.DynTFTComponentType), 5, 2);
+      FDynTFT_Write_Text_Callback(APanelBase.Caption, 5, 20);
+      FDynTFT_Write_Text_Callback(E.Message, 5, 42);
+    end;
+  end;
 end;
 
 

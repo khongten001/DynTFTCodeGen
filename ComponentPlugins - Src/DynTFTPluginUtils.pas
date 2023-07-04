@@ -234,7 +234,14 @@ begin
             TempStringList.Strings[0] := 'Ex: ' + TempStringList.Strings[0];
 
           for i := 0 to TempStringList.Count - 1 do
-            DynTFT_Write_Text(TempStringList.Strings[i], 0, i * 15);
+          begin
+            try
+              DynTFT_Write_Text(TempStringList.Strings[i], 0, i * 15);  //this call will to work when using the RS plugin and its server is not available
+            except
+              on E: Exception do
+                raise Exception.Create('Drawing procedures are not available on handling ex. Ex: ' + E.Message + '.  ' + TempStringList.Strings[i]);
+            end;
+          end;
         finally
           TempStringList.Free;
         end;
@@ -243,11 +250,16 @@ begin
   end
   else
   begin
-    DynTFT_Set_Pen(clRed, 1);
-    DynTFT_Set_Brush(1, clWhite, 0, 0, 0, 0);
-    DynTFT_Rectangle(0, 0, APanelBase.Width - 1, APanelBase.Height - 1);
-    DynTFT_Write_Text('Unimplemented at index: ' + IntToStr(APanelBase.DynTFTComponentType), 5, 2);
-    DynTFT_Write_Text(APanelBase.Caption, 5, 20);
+    try
+      DynTFT_Set_Pen(clRed, 1);
+      DynTFT_Set_Brush(1, clWhite, 0, 0, 0, 0);
+      DynTFT_Rectangle(0, 0, APanelBase.Width - 1, APanelBase.Height - 1);
+      DynTFT_Write_Text('Unimplemented at index: ' + IntToStr(APanelBase.DynTFTComponentType), 5, 2);
+      DynTFT_Write_Text(APanelBase.Caption, 5, 20);
+    except
+      on E: Exception do
+        raise Exception.Create('Drawing procedures are not available. Ex: ' + E.Message);
+    end;
   end;
 end;
 

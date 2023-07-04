@@ -8,6 +8,7 @@ object frmDynTFTCGRemoteSystemServerMain: TfrmDynTFTCGRemoteSystemServerMain
   ClientWidth = 600
   OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   LCLVersion = '7.5'
   object memLog: TMemo
     Left = 8
@@ -75,5 +76,11 @@ object frmDynTFTCGRemoteSystemServerMain: TfrmDynTFTCGRemoteSystemServerMain
     OnTimer = tmrStatsTimer
     Left = 476
     Top = 84
+  end
+  object tmrLogging: TTimer
+    Interval = 200
+    OnTimer = tmrLoggingTimer
+    Left = 480
+    Top = 152
   end
 end

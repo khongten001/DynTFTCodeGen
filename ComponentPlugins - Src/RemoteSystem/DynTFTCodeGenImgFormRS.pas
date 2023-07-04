@@ -42,19 +42,25 @@ interface
 
 uses
   Windows, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, StdCtrls, ComCtrls;
+  Dialogs, ExtCtrls, StdCtrls, ComCtrls, PollingFIFO;
 
 type
   TfrmImg = class(TForm)
     memLog: TMemo;
     pnlStatus: TPanel;
     btnSettings: TButton;
+    tmrLogging: TTimer;
     procedure FormClose(Sender: TObject; var {$IFDEF FPC}CloseAction {$ELSE} Action {$ENDIF}: TCloseAction);
     procedure btnSettingsClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure tmrLoggingTimer(Sender: TObject);
   private
     { Private declarations }
+    FLoggingFIFO: TPollingFIFO;
   public
     { Public declarations }
+    procedure AddToLog(s: string);
   end;
 
 var
@@ -67,6 +73,12 @@ implementation
 uses
   RSSettingsForm, DynTFTCGRemoteSystemExportedFunctions, RSPanelDrawing,
   DynTFTUtils, IdGlobal, IdTCPServer;
+
+
+procedure TfrmImg.AddToLog(s: string);
+begin
+  FLoggingFIFO.Put(s);
+end;  
 
 
 procedure TfrmImg.btnSettingsClick(Sender: TObject);
@@ -148,6 +160,42 @@ procedure TfrmImg.FormClose(Sender: TObject; var {$IFDEF FPC}CloseAction {$ELSE}
 begin
   {$IFDEF FPC}CloseAction {$ELSE} Action {$ENDIF} := caNone;     //All plugins should implement this, because otherwise, closing the form will close DynTFTCodeGen.
   Hide;
+end;
+
+
+procedure TfrmImg.FormCreate(Sender: TObject);
+begin
+  FLoggingFIFO := TPollingFIFO.Create;
+end;
+
+
+procedure TfrmImg.FormDestroy(Sender: TObject);
+begin
+  FreeAndNil(FLoggingFIFO);
+end;
+
+
+procedure TfrmImg.tmrLoggingTimer(Sender: TObject);
+var
+  TempStrings: TStringList;
+  i: Integer;
+begin
+  //FLoggingFIFO.PopAll(memLogErr.Lines); //this resets the memo view to the first line
+
+  try
+    TempStrings := TStringList.Create;
+    try
+      FLoggingFIFO.PopAll(TempStrings);
+
+      for i:= 0 to TempStrings.Count - 1 do
+        memLog.Lines.Add(DateTimeToStr(Now) + '  ' + TempStrings[i]);  //adding lines, one by one, instead of calling AddStrings, to leave the focus to the last line
+    finally
+      TempStrings.Free;
+    end;
+  except
+    on E: Exception do
+      memLog.Lines.Add('Exception on adding to log: ' + E.Message);
+  end;
 end;
 
 end.

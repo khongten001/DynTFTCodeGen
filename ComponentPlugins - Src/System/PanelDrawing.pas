@@ -1237,6 +1237,7 @@ begin
       Items_Enabling := TStringList.Create;
       try
         PrepareVirtualTable(PropertiesOrEvents, SchemaConstants, ColorConstants, AFontSettings, ADynTFTVirtualTable);
+        UpdateComponentPropertyByName(PropertiesOrEvents, 'ColumnCount', IntToStr(ADynTFTVirtualTable^.Columns.Len));
 
         for i := 0 to ADynTFTVirtualTable^.Columns.Len - 1 do
         begin

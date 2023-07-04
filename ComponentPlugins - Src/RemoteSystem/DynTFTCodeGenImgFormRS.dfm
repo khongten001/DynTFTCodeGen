@@ -115,6 +115,8 @@ object frmImg: TfrmImg
     0001800000018000000180000001800000018000000180000001FFFFFFFF}
   OldCreateOrder = True
   OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   DesignSize = (
     635
     293)
@@ -156,5 +158,11 @@ object frmImg: TfrmImg
     Caption = 'Settings...'
     TabOrder = 2
     OnClick = btnSettingsClick
+  end
+  object tmrLogging: TTimer
+    Interval = 200
+    OnTimer = tmrLoggingTimer
+    Left = 480
+    Top = 152
   end
 end

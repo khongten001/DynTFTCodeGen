@@ -48,7 +48,7 @@ uses
   Types,
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
   IdTCPServer, IdSync, IdCustomTCPServer, IdContext, IdTCPClient,
-  IdBaseComponent, IdComponent, ComCtrls;
+  IdBaseComponent, IdComponent, ComCtrls, PollingFIFO;
 
 type
 
@@ -57,6 +57,7 @@ type
   TfrmDynTFTCGRemoteSystemServerMain = class(TForm)
     IdTCPServer1: TIdTCPServer;
     memLog: TMemo;
+    tmrLogging: TTimer;
     tmrPrepareClient: TTimer;
     tmrCloseClient: TTimer;
     tmrStartup: TTimer;
@@ -65,24 +66,22 @@ type
     tmrStats: TTimer;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure IdTCPServer1Execute(AContext: TIdContext);
     procedure tmrCloseClientTimer(Sender: TObject);
+    procedure tmrLoggingTimer(Sender: TObject);
     procedure tmrPrepareClientTimer(Sender: TObject);
     procedure tmrStartupTimer(Sender: TObject);
     procedure tmrStatsTimer(Sender: TObject);
   private
+    FLoggingFIFO: TPollingFIFO;
+
     procedure AddToLog(s: string);
     procedure AddToLogFromThread(s: string);
     procedure PrepareClient;
     procedure CloseClient;
   public
 
-  end;
-
-  TSyncObj = class(TIdSync)
-    FMsg: string;
-  protected
-    procedure DoSynchronize; override;
   end;
 
   TPrepareClientSyncObj = class(TIdSync)
@@ -127,12 +126,6 @@ var
   FPluginPort: Integer;
 
 
-procedure TSyncObj.DoSynchronize;
-begin
-  frmDynTFTCGRemoteSystemServerMain.AddToLog(FMsg);
-end;
-
-
 procedure TPrepareClientSyncObj.DoSynchronize;
 begin
   frmDynTFTCGRemoteSystemServerMain.tmrPrepareClient.Enabled := True;
@@ -150,7 +143,15 @@ end;
 procedure TfrmDynTFTCGRemoteSystemServerMain.FormCreate(Sender: TObject);
 begin
   FPluginPort := 0;
+  FLoggingFIFO := TPollingFIFO.Create;
+
   tmrStartup.Enabled := True;
+end;
+
+
+procedure TfrmDynTFTCGRemoteSystemServerMain.FormDestroy(Sender: TObject);
+begin
+  FLoggingFIFO.Free;
 end;
 
 
@@ -451,12 +452,15 @@ procedure Handle_DrawPDynTFTComponentOnPanel(ASocket: TIdIOHandlerSocket; ACompN
 var
   PropertiesOrEvents, SchemaConstants, ColorConstants, FontSettings: string;
   TempPropertiesOrEvents, BkpPropertiesOrEvents: TDynTFTDesignPropertyArr;
+  InitialPropertiesOrEvents: TDynTFTDesignPropertyArr;
   TempSchemaConstants: TComponentConstantArr;
   TempColorConstants: TColorConstArr;
   TempFontSettings: TFontSettingsArr;
   i: Integer;
   TempPanelBase: TUIPanelBase;
   DrawingResponse: string;
+  s: string;
+  IndexInTemp: Integer;
 begin
   //frmDynTFTCGRemoteSystemServerMain.AddToLogFromThread('DrawPDynTFTComponentOnPanel: ' + ACompName);
 
@@ -478,18 +482,50 @@ begin
       FontSettingsStrToArr(FontSettings, TempFontSettings);
       PanelBaseSettingsToPanelBase(ACmdParam, TempPanelBase);
 
-      SetLength(DrawingCommands, 0);
+      SetLength(InitialPropertiesOrEvents, Length(TempPropertiesOrEvents));
       try
-        FDrawingProcedures[TempPanelBase.DynTFTComponentType](TempPanelBase, TempPropertiesOrEvents, TempSchemaConstants, TempColorConstants, TempFontSettings);
+        for i := 0 to Length(TempPropertiesOrEvents) - 1 do
+          InitialPropertiesOrEvents[i] := TempPropertiesOrEvents[i];
 
-        DrawingResponse := '';
-        for i := 0 to Length(DrawingCommands) - 1 do
-          DrawingResponse := DrawingResponse + DrawingCommands[i] + CRecFieldArrayItemSeparator;
-
-        ASocket.WriteLn(DrawingResponse);
-      finally
         SetLength(DrawingCommands, 0);
+        try
+          FDrawingProcedures[TempPanelBase.DynTFTComponentType](TempPanelBase, TempPropertiesOrEvents, TempSchemaConstants, TempColorConstants, TempFontSettings);
+
+          DrawingResponse := '';
+          for i := 0 to Length(DrawingCommands) - 1 do
+            DrawingResponse := DrawingResponse + DrawingCommands[i] + CRecFieldArrayItemSeparator;
+
+          ASocket.WriteLn(DrawingResponse);
+        finally
+          SetLength(DrawingCommands, 0);
+        end;
+
+
+        s := '';
+        for i := 0 to Length(InitialPropertiesOrEvents) - 1 do
+          if InitialPropertiesOrEvents[i].PropertyName = TempPropertiesOrEvents[i].PropertyName then
+          begin
+            if InitialPropertiesOrEvents[i].PropertyValue <> TempPropertiesOrEvents[i].PropertyValue then
+            begin
+              s := s + InitialPropertiesOrEvents[i].PropertyName + '=' + TempPropertiesOrEvents[i].PropertyValue + #4#5;
+              //frmDynTFTCGRemoteSystemServerMain.AddToLogFromThread('.. setting (=)   ' + InitialPropertiesOrEvents[i].PropertyName + '=' + TempPropertiesOrEvents[i].PropertyValue);
+            end;
+          end
+          else
+          begin  //handle the case of inserting / adding or removing properties
+            IndexInTemp := GetPropertyIndexInPropertiesOrEventsByName(TempPropertiesOrEvents, InitialPropertiesOrEvents[i].PropertyName);
+            if (IndexInTemp > -1) and (InitialPropertiesOrEvents[IndexInTemp].PropertyName = TempPropertiesOrEvents[i].PropertyValue) then ;
+              if InitialPropertiesOrEvents[i].PropertyValue <> TempPropertiesOrEvents[i].PropertyValue then
+              begin
+                s := s + InitialPropertiesOrEvents[i].PropertyName + '=' + TempPropertiesOrEvents[i].PropertyValue + #4#5;
+                //frmDynTFTCGRemoteSystemServerMain.AddToLogFromThread('.. setting (<>)    ' + InitialPropertiesOrEvents[i].PropertyName + '=' + TempPropertiesOrEvents[i].PropertyValue);
+              end;
+          end;
+      finally
+        SetLength(InitialPropertiesOrEvents, 0);
       end;
+
+      ASocket.WriteLn(s); //this is the list of modified properties
     finally
       SetLength(TempPropertiesOrEvents, 0);
       SetLength(TempSchemaConstants, 0);
@@ -1062,20 +1098,36 @@ end;
 
 procedure TfrmDynTFTCGRemoteSystemServerMain.AddToLog(s: string);
 begin
-  memLog.Lines.Add(DateTimeToStr(Now) + '  ' + s);
+  FLoggingFIFO.Put(s);
 end;
 
 
 procedure TfrmDynTFTCGRemoteSystemServerMain.AddToLogFromThread(s: string);
-var
-  SynObj: TSyncObj;
 begin
-  SynObj := TSyncObj.Create;
+  FLoggingFIFO.Put(s);
+end;
+
+
+procedure TfrmDynTFTCGRemoteSystemServerMain.tmrLoggingTimer(Sender: TObject);
+var
+  TempStrings: TStringList;
+  i: Integer;
+begin
+  //FLoggingFIFO.PopAll(memLogErr.Lines); //this resets the memo view to the first line
+
   try
-    SynObj.FMsg := s;
-    SynObj.Synchronize;
-  finally
-    SynObj.Free;
+    TempStrings := TStringList.Create;
+    try
+      FLoggingFIFO.PopAll(TempStrings);
+
+      for i:= 0 to TempStrings.Count - 1 do
+        memLog.Lines.Add(DateTimeToStr(Now) + '  ' + TempStrings[i]);  //adding lines, one by one, instead of calling AddStrings, to leave the focus to the last line
+    finally
+      TempStrings.Free;
+    end;
+  except
+    on E: Exception do
+      memLog.Lines.Add('Exception on adding to log: ' + E.Message);
   end;
 end;
 

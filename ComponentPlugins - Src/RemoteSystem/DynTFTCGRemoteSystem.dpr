@@ -59,7 +59,8 @@ uses
   TFTCallbacks in '..\TFTCallbacks.pas',
   DynTFTCodeGenImgFormRS in 'DynTFTCodeGenImgFormRS.pas' {frmImg},
   RemoteSystemCommands in 'RemoteSystemCommands.pas',
-  RSSettingsForm in 'RSSettingsForm.pas' {frmRSSettings};
+  RSSettingsForm in 'RSSettingsForm.pas' {frmRSSettings},
+  PollingFIFO in '..\..\..\MiscUtils\PollingFIFO.pas';
 
 {$R *.res}
 

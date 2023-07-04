@@ -100,12 +100,18 @@ const
 
 procedure SendPlainStringToServer(s: string);
 begin
+  if FIdTCPClient.Socket = nil then
+    raise Exception.Create('Not connected to server.');
+
   FIdTCPClient.Socket.WriteLn(s);
 end;
 
 
 procedure SendCommandToServer(ACmd, ACmdParam: string);
 begin
+  if FIdTCPClient.Socket = nil then
+    raise Exception.Create('Not connected to server.');
+  
   FIdTCPClient.Socket.WriteLn(ACmd + '=' + ACmdParam);
 end;
 

@@ -50,7 +50,7 @@ uses
   Interfaces, // this includes the CT adLCL widgetset
   Forms, DynTFTCGRemoteSystemServerMainForm, RemoteSystemCommands, PanelDrawing,
   DynTFTColorThemeGenLiveColors, DynTFTPluginUtils,
-  DynTFTCodeGenSharedDataTypes, DynTFTSharedUtils, TFT, DynArrays,
+  DynTFTCodeGenSharedDataTypes, DynTFTSharedUtils, TFT, DynArrays, PollingFIFO,
   ComponentIcons, DynTFTCodeGenImgFormFP;
 
 {$R *.res}
