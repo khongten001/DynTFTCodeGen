@@ -511,6 +511,10 @@ begin
         TempPanel := PDynTFTPanel(ADynTFTVirtualTable^.HeaderItems.Content^[i]);
         TempPanel.Caption := LocalHeaderItems.Strings[i];
 
+        TempPanel^.Color := GetColorConstByNameFromAllColorConsts(ColorConstants, GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'Header^.Color'), clRed);
+        TempPanel^.Font_Color := GetColorConstByNameFromAllColorConsts(ColorConstants, GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'Header^.Font_Color'), clAqua);
+        TempPanel^.ActiveFont := PByte(FontPropertyValueToSFont(AFontSettings, GetPropertyValueInPropertiesOrEventsByName(PropertiesOrEvents, 'Header^.ActiveFont')));
+
         try
           TempPanel.BaseProps.Width := StrToIntDef(ColumnWidths.Strings[i], 7);
         except //there may be AV, if the user did not define all column widths
@@ -521,6 +525,9 @@ begin
     finally
       ColumnWidths.Free;
     end;
+
+    ADynTFTVirtualTable^.HorizScrollBar^.Max := LocalHeaderItems.Count - 1;
+    ADynTFTVirtualTable^.HorizScrollBar^.Position := 0;
   finally
     LocalHeaderItems.Free;
   end;

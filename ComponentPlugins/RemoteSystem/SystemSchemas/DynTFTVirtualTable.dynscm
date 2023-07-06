@@ -1,5 +1,5 @@
 [ComponentPropertiesSchema]
-Count=15
+Count=17
 Prop_0_Name=Items^.Font_Color
 Prop_0_DataType=TColor
 Prop_0_DefaultValue=CL_DynTFTItems_EnabledFont
@@ -93,6 +93,18 @@ Prop_14_DefaultValue=@TFT_defaultFont
 Prop_14_Description=Header font
 Prop_14_AvailableOnCompilerDirectives=DynTFTFontSupport
 Prop_14_DesignTimeOnly=1
+Prop_15_Name=Header^.Color
+Prop_15_DataType=TColor
+Prop_15_DefaultValue=CL_DynTFTPanel_Background
+Prop_15_Description=Header color
+Prop_15_AvailableOnCompilerDirectives=
+Prop_15_DesignTimeOnly=1
+Prop_16_Name=Header^.Font_Color
+Prop_16_DataType=TColor
+Prop_16_DefaultValue=CL_DynTFTPanel_EnabledFont
+Prop_16_Description=Header font color
+Prop_16_AvailableOnCompilerDirectives=
+Prop_16_DesignTimeOnly=1
 
 [ComponentPropertiesOverrides]
 Count=2
@@ -141,61 +153,91 @@ Const_2_DataType=Integer
 Const_2_Value=3
 
 [ColorConstants]
-Count=2
+Count=4
 Const_0_Name=CL_DynTFTItems_Background
 Const_0_DataType=TColor
 Const_0_Value=CL_WHITE
 Const_1_Name=CL_DynTFTItems_EnabledFont
 Const_1_DataType=TColor
 Const_1_Value=CL_BLACK
+Const_2_Name=CL_DynTFTPanel_Background
+Const_2_DataType=TColor
+Const_2_Value=CL_LIGHTBLUE
+Const_3_Name=CL_DynTFTPanel_EnabledFont
+Const_3_DataType=TColor
+Const_3_Value=CL_BLACK
 
 [OneTimeComponentInitCode_Interface]
-Count=7
+Count=8
 Line_0=//VirtualTable code
 Line_1=type
 Line_2=TVirtualTableColumnCaption = string[CMaxPanelStringLength];
 Line_3=TVirtualTableColumnCaptionArr = array{$IFDEF IsMCU}[0..0]{$ENDIF} of TVirtualTableColumnCaption;
 Line_4=TVirtualTableColumnByteArr = array of Byte;
 Line_5=
-Line_6=procedure PDynTFTVirtualTable_CreateColumns(ADynTFTVirtualTable: PDynTFTVirtualTable; ColumnCount, ItemsCount {$IFDEF ItemsVisibility}, TotalVisibleCount{$ENDIF}: Integer; {$IFDEF IsMCU}var Captions: TVirtualTableColumnCaptionArr{$ELSE} const Captions: array of TVirtualTableColumnCaption{$ENDIF} {$IFNDEF UseExternalItems}{$IFDEF ItemsVisibility}; {$IFDEF IsMCU}var AItemsVisible: TVirtualTableColumnByteArr{$ELSE} const AItemsVisible: array of Byte{$ENDIF}{$ENDIF} {$IFDEF ItemsEnabling}; {$IFDEF IsMCU}var AItemsEnabled: TVirtualTableColumnByteArr{$ELSE} const AItemsEnabled: array of Byte{$ENDIF}{$ENDIF}{$ENDIF});
-
+Line_6=procedure PDynTFTVirtualTable_CreateColumns(ADynTFTVirtualTable: PDynTFTVirtualTable; ColumnCount, ItemsCount {$IFDEF ItemsVisibility}, TotalVisibleCount{$ENDIF}: Integer; {$IFDEF IsMCU}var Captions: TVirtualTableColumnCaptionArr{$ELSE} const Captions: array of TVirtualTableColumnCaption{$ENDIF} {$IFNDEF UseExternalItems}{$IFDEF ItemsVisibility}; {$IFDEF IsMCU}var AItemsVisible: TVirtualTableColumnByteArr{$ELSE} const AItemsVisible: array of Byte{$ENDIF}{$ENDIF} {$IFDEF ItemsEnabling}; {$IFDEF IsMCU}var AItemsEnabled: TVirtualTableColumnByteArr{$ELSE} const AItemsEnabled: array of Byte{$ENDIF}{$ENDIF}{$ENDIF} {$IFDEF DynTFTFontSupport}; AHeaderActiveFont: PByte{$ENDIF});
+Line_7=procedure PDynTFTVirtualTable_SetRemainingProperties(ADynTFTVirtualTable: PDynTFTVirtualTable; ColumnCount, AItemHeight, AItemIndex: Integer {$IFDEF DynTFTFontSupport}; AActiveFont: PByte{$ENDIF}; AVisibleIcons: Boolean);
 
 [OneTimeComponentInitCode_Implementation]
-Count=34
-Line_0=procedure PDynTFTVirtualTable_CreateColumns(ADynTFTVirtualTable: PDynTFTVirtualTable; ColumnCount, ItemsCount {$IFDEF ItemsVisibility}, TotalVisibleCount{$ENDIF}: Integer; {$IFDEF IsMCU}var Captions: TVirtualTableColumnCaptionArr{$ELSE} const Captions: array of TVirtualTableColumnCaption{$ENDIF} {$IFNDEF UseExternalItems}{$IFDEF ItemsVisibility}; {$IFDEF IsMCU}var AItemsVisible: TVirtualTableColumnByteArr{$ELSE} const AItemsVisible: array of Byte{$ENDIF}{$ENDIF} {$IFDEF ItemsEnabling}; {$IFDEF IsMCU}var AItemsEnabled: TVirtualTableColumnByteArr{$ELSE} const AItemsEnabled: array of Byte{$ENDIF}{$ENDIF}{$ENDIF});
+Count=58
+Line_0=procedure PDynTFTVirtualTable_CreateColumns(ADynTFTVirtualTable: PDynTFTVirtualTable; ColumnCount, ItemsCount {$IFDEF ItemsVisibility}, TotalVisibleCount{$ENDIF}: Integer; {$IFDEF IsMCU}var Captions: TVirtualTableColumnCaptionArr{$ELSE} const Captions: array of TVirtualTableColumnCaption{$ENDIF} {$IFNDEF UseExternalItems}{$IFDEF ItemsVisibility}; {$IFDEF IsMCU}var AItemsVisible: TVirtualTableColumnByteArr{$ELSE} const AItemsVisible: array of Byte{$ENDIF}{$ENDIF} {$IFDEF ItemsEnabling}; {$IFDEF IsMCU}var AItemsEnabled: TVirtualTableColumnByteArr{$ELSE} const AItemsEnabled: array of Byte{$ENDIF}{$ENDIF}{$ENDIF} {$IFDEF DynTFTFontSupport}; AHeaderActiveFont: PByte{$ENDIF});
 Line_1=var
 Line_2=i {$IFNDEF UseExternalItems}, j{$ENDIF}: Integer;
 Line_3=TempListBox: PDynTFTListBox;
 Line_4=TempPanel: PDynTFTPanel;
-Line_5=begin
-Line_6=for i := 1 to ColumnCount - 1 do //starts at 1, because there is already a first column
-Line_7=DynTFTAddColumnToVirtualTable(ADynTFTVirtualTable);
-Line_8=
-Line_9=for i := 0 to ColumnCount - 1 do
-Line_10=begin
-Line_11=TempPanel := PDynTFTPanel(TPtrRec(ADynTFTVirtualTable^.HeaderItems^.Content^[i]));
-Line_12=TempPanel^.Caption := Captions[i];
-Line_13=TempPanel^.BaseProps.Width := CDynTFTVirtualTable0_ColumnWidths[i];
-Line_14=
-Line_15=TempListBox := PDynTFTListBox(TPtrRec(ADynTFTVirtualTable^.Columns^.Content^[i]));
-Line_16=TempListBox^.Items^.Count := ItemsCount;
-Line_17={$IFDEF ItemsVisibility}
-Line_18=TempListBox^.Items^.TotalVisibleCount := TotalVisibleCount;
-Line_19={$ENDIF}
-Line_20=
-Line_21={$IFNDEF UseExternalItems}
-Line_22=for j := 0 to ItemsCount - 1 do
-Line_23=begin
-Line_24={$IFDEF ItemsVisibility}
-Line_25=TempListBox^.Items^.ItemsVisible[j] := AItemsVisible[j] = 1;
-Line_26={$ENDIF}
-Line_27={$IFDEF ItemsEnabling}
-Line_28=TempListBox^.Items^.ItemsEnabled[j] := AItemsEnabled[j] = 1;
-Line_29={$ENDIF}
-Line_30=end;
-Line_31={$ENDIF}
-Line_32=end;
-Line_33=end;
+Line_5=TempItems: PDynTFTItems;
+Line_6=begin
+Line_7=for i := 1 to ColumnCount - 1 do //starts at 1, because there is already a first column
+Line_8=DynTFTAddColumnToVirtualTable(ADynTFTVirtualTable);
+Line_9=
+Line_10=for i := 0 to ColumnCount - 1 do
+Line_11=begin
+Line_12=TempPanel := PDynTFTPanel(TPtrRec(ADynTFTVirtualTable^.HeaderItems^.Content^[i]));
+Line_13=TempPanel^.Caption := Captions[i];
+Line_14=TempPanel^.BaseProps.Width := CDynTFTVirtualTable0_ColumnWidths[i];
+Line_15={$IFDEF DynTFTFontSupport}
+Line_16=TempPanel^.ActiveFont := AHeaderActiveFont;
+Line_17={$ENDIF}
+Line_18=
+Line_19=TempListBox := PDynTFTListBox(TPtrRec(ADynTFTVirtualTable^.Columns^.Content^[i]));
+Line_20=TempItems := TempListBox^.Items;
+Line_21=TempItems^.Count := ItemsCount;
+Line_22={$IFDEF ItemsVisibility}
+Line_23=TempItems^.TotalVisibleCount := TotalVisibleCount;
+Line_24={$ENDIF}
+Line_25=
+Line_26={$IFNDEF UseExternalItems}
+Line_27=for j := 0 to ItemsCount - 1 do
+Line_28=begin
+Line_29={$IFDEF ItemsVisibility}
+Line_30=TempItems^.ItemsVisible[j] := AItemsVisible[j] = 1;
+Line_31={$ENDIF}
+Line_32={$IFDEF ItemsEnabling}
+Line_33=TempItems^.ItemsEnabled[j] := AItemsEnabled[j] = 1;
+Line_34={$ENDIF}
+Line_35=end;
+Line_36={$ENDIF}
+Line_37=end;
+Line_38=end;
+Line_39=
+Line_40=procedure PDynTFTVirtualTable_SetRemainingProperties(ADynTFTVirtualTable: PDynTFTVirtualTable; ColumnCount, AItemHeight, AItemIndex: Integer {$IFDEF DynTFTFontSupport}; AActiveFont: PByte{$ENDIF}; AVisibleIcons: Boolean);
+Line_41=var
+Line_42=i: Integer;
+Line_43=TempListBox: PDynTFTListBox;
+Line_44=TempItems: PDynTFTItems;
+Line_45=begin
+Line_46=for i := 0 to ColumnCount - 1 do
+Line_47=begin
+Line_48=TempListBox := PDynTFTListBox(TPtrRec(ADynTFTVirtualTable^.Columns^.Content^[i]));
+Line_49=TempItems := TempListBox^.Items;
+Line_50=TempItems^.ItemHeight := AItemHeight;
+Line_51=TempItems^.ItemIndex := AItemIndex;
+Line_52=TempItems^.VisibleIcons := AVisibleIcons;
+Line_53={$IFDEF DynTFTFontSupport}
+Line_54=TempItems^.ActiveFont := AActiveFont;
+Line_55={$ENDIF}
+Line_56=end;
+Line_57=end;
 
 [OneTimeComponentInitCode]
 Count=1
@@ -211,8 +253,10 @@ Line_4=C_<NoString_ObjectName>__ItemsVisible: array[0.._<Length(Items^.Strings
 Line_5=C_<NoString_ObjectName>__ItemsEnabled: array[0.._<Length(Items^.Strings)>_ - 1] of Byte = (_<CSV(Items^.ItemsEnabled)>_);
 
 [PerInstanceInitCode]
-Count=1
-Line_0=PDynTFTVirtualTable_CreateColumns(_<NoString_LocalObjectName>_, _<ColumnCount>_, C_<NoString_ObjectName>__ItemsCount {$IFDEF ItemsVisibility}, C_<NoString_ObjectName>__TotalVisibleCount{$ENDIF}, C_<NoString_ObjectName>__Captions {$IFNDEF UseExternalItems}{$IFDEF ItemsVisibility}, C_<NoString_ObjectName>__ItemsVisible{$ENDIF} {$IFDEF ItemsEnabling}, C_<NoString_ObjectName>__ItemsEnabled{$ENDIF}{$ENDIF});
+Count=2
+Line_0=PDynTFTVirtualTable_CreateColumns(_<NoString_LocalObjectName>_, _<ColumnCount>_, C_<NoString_ObjectName>__ItemsCount {$IFDEF ItemsVisibility}, C_<NoString_ObjectName>__TotalVisibleCount{$ENDIF}, C_<NoString_ObjectName>__Captions {$IFNDEF UseExternalItems}{$IFDEF ItemsVisibility}, C_<NoString_ObjectName>__ItemsVisible{$ENDIF} {$IFDEF ItemsEnabling}, C_<NoString_ObjectName>__ItemsEnabled{$ENDIF}{$ENDIF} {$IFDEF DynTFTFontSupport}, {$IFDEF IsDesktop} PByte(@CAllFontSettings[0]) {$ELSE} _<Header^.ActiveFont>_ {$ENDIF}{$ENDIF}); ///////////////////hardcoded to [0] for now
+Line_1=PDynTFTVirtualTable_SetRemainingProperties(_<NoString_LocalObjectName>_, _<ColumnCount>_, _<Items^.ItemHeight>_, _<Items^.ItemIndex>_ {$IFDEF DynTFTFontSupport}, {$IFDEF IsDesktop} PByte(@CAllFontSettings[0]) {$ELSE} _<Header^.ActiveFont>_ {$ENDIF}{$ENDIF}, _<Items^.VisibleIcons>_); ///////////////////hardcoded to [0] for now
+;CG should generate constants like CourierNew_Font: PDynTFTFontSettings = @CAllFontSettings[0];  in DynTFTFonts. When calling above functions, for desktop, the const should be _<Header^.ActiveFont>__Font
 
 [CreateComponentCode]
 Count=2
