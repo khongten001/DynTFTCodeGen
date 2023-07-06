@@ -254,9 +254,8 @@ Line_5=C_<NoString_ObjectName>__ItemsEnabled: array[0.._<Length(Items^.Strings
 
 [PerInstanceInitCode]
 Count=2
-Line_0=PDynTFTVirtualTable_CreateColumns(_<NoString_LocalObjectName>_, _<ColumnCount>_, C_<NoString_ObjectName>__ItemsCount {$IFDEF ItemsVisibility}, C_<NoString_ObjectName>__TotalVisibleCount{$ENDIF}, C_<NoString_ObjectName>__Captions {$IFNDEF UseExternalItems}{$IFDEF ItemsVisibility}, C_<NoString_ObjectName>__ItemsVisible{$ENDIF} {$IFDEF ItemsEnabling}, C_<NoString_ObjectName>__ItemsEnabled{$ENDIF}{$ENDIF} {$IFDEF DynTFTFontSupport}, {$IFDEF IsDesktop} PByte(@CAllFontSettings[0]) {$ELSE} _<Header^.ActiveFont>_ {$ENDIF}{$ENDIF}); ///////////////////hardcoded to [0] for now
-Line_1=PDynTFTVirtualTable_SetRemainingProperties(_<NoString_LocalObjectName>_, _<ColumnCount>_, _<Items^.ItemHeight>_, _<Items^.ItemIndex>_ {$IFDEF DynTFTFontSupport}, {$IFDEF IsDesktop} PByte(@CAllFontSettings[0]) {$ELSE} _<Header^.ActiveFont>_ {$ENDIF}{$ENDIF}, _<Items^.VisibleIcons>_); ///////////////////hardcoded to [0] for now
-;CG should generate constants like CourierNew_Font: PDynTFTFontSettings = @CAllFontSettings[0];  in DynTFTFonts. When calling above functions, for desktop, the const should be _<Header^.ActiveFont>__Font
+Line_0=PDynTFTVirtualTable_CreateColumns(_<NoString_LocalObjectName>_, _<ColumnCount>_, C_<NoString_ObjectName>__ItemsCount {$IFDEF ItemsVisibility}, C_<NoString_ObjectName>__TotalVisibleCount{$ENDIF}, C_<NoString_ObjectName>__Captions {$IFNDEF UseExternalItems}{$IFDEF ItemsVisibility}, C_<NoString_ObjectName>__ItemsVisible{$ENDIF} {$IFDEF ItemsEnabling}, C_<NoString_ObjectName>__ItemsEnabled{$ENDIF}{$ENDIF} {$IFDEF DynTFTFontSupport}, {$IFDEF IsDesktop} PByte(_<Header^.ActiveFont>__Font) {$ELSE} _<Header^.ActiveFont>_ {$ENDIF}{$ENDIF});
+Line_1=PDynTFTVirtualTable_SetRemainingProperties(_<NoString_LocalObjectName>_, _<ColumnCount>_, _<Items^.ItemHeight>_, _<Items^.ItemIndex>_ {$IFDEF DynTFTFontSupport}, {$IFDEF IsDesktop} PByte(_<Items^.ActiveFont>__Font) {$ELSE} _<Items^.ActiveFont>_ {$ENDIF}{$ENDIF}, _<Items^.VisibleIcons>_);
 
 [CreateComponentCode]
 Count=2
