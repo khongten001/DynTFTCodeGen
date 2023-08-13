@@ -1,0 +1,131 @@
+[FileDescription]
+Count=8
+Line_0=The title is used by this editor only.
+Line_1=The Item_Count keys contain the name of the "Count" property for a particular category.
+Line_2=The "~Index~" string is used here as a replacement for a numeric index in the edited schema file.
+Line_3=The ReservedComponentPropertiesSchema category contains properties which are added to the schema file, but they are commented.
+Line_4=StructureType can be 0, 1, or 2. 
+Line_5=-  0 = Countable (i.e. array of structure. See ComponentPropertiesSchema).
+Line_6=-  1 = Code (flat lines of code, no structure).
+Line_7=-  2 = Misc keys (see ComponentRegistration).
+
+[Settings]
+Title=Schema metadata for DynTFTCodeGen's BaseSchema.dynscm.
+CategoryCount=5
+
+[PredefinedDataTypes]
+Count=13
+DT_0=TColor
+DT_1=Byte
+DT_2=Word
+DT_3=Integer
+DT_4=PByte
+DT_5=Boolean
+DT_6=String
+DT_7=String[~Const~]
+DT_8=Array of String
+DT_9=Array of String[~Const~]
+DT_10=Array of Boolean
+DT_11=Array of Integer
+DT_12=PDynTFTOnMouseEvent
+
+[Cat_0]
+Name=ComponentPropertiesSchema
+CategoryComment=Main component properties.
+Item_CountKey=Count
+CategoryEnabled=1
+StructureType=0
+CountableCount=7
+Item_0=Prop_~Index~_Name
+Item_1=Prop_~Index~_DataType
+Item_2=Prop_~Index~_DefaultValue
+Item_3=Prop_~Index~_Description
+Item_4=Prop_~Index~_AvailableOnCompilerDirectives
+Item_5=Prop_~Index~_DesignTimeOnly
+Item_6=Prop_~Index~_ReadOnly
+Item_0_EditorType=Text
+Item_1_EditorType=EnumCombo
+Item_2_EditorType=Text
+Item_3_EditorType=Text
+Item_4_EditorType=EnumComboWithBtn
+Item_5_EditorType=BooleanCombo
+Item_6_EditorType=BooleanCombo
+MiscCount=0
+
+[Cat_1]
+Name=ReservedComponentPropertiesSchema
+CategoryComment=Properties used for debugging. Should be copied to the ComponentPropertiesSchema category when needed. This list may also contain events, if they share the same structure.
+Item_CountKey=Count
+CategoryEnabled=0
+StructureType=0
+CountableCount=7
+Item_0=Prop_~Index~_Name
+Item_1=Prop_~Index~_DataType
+Item_2=Prop_~Index~_DefaultValue
+Item_3=Prop_~Index~_Description
+Item_4=Prop_~Index~_AvailableOnCompilerDirectives
+Item_5=Prop_~Index~_DesignTimeOnly
+Item_6=Prop_~Index~_ReadOnly
+Item_0_EditorType=Text
+Item_1_EditorType=EnumCombo
+Item_2_EditorType=Text
+Item_3_EditorType=Text
+Item_4_EditorType=EnumComboWithBtn
+Item_5_EditorType=BooleanCombo
+Item_6_EditorType=BooleanCombo
+MiscCount=0
+
+[Cat_2]
+Name=ComponentEventsPropertiesSchema
+CategoryComment=Main component events.
+Item_CountKey=Count
+CategoryEnabled=1
+StructureType=0
+CountableCount=8
+Item_0=Prop_~Index~_Name
+Item_1=Prop_~Index~_DataType
+Item_2=Prop_~Index~_DefaultValue
+Item_3=Prop_~Index~_Description
+Item_4=Prop_~Index~_AvailableOnCompilerDirectives
+Item_5=Prop_~Index~_DesignTimeOnly
+Item_6=Prop_~Index~_ReadOnly
+Item_7=Prop_~Index~_DataTypeDefinition
+Item_0_EditorType=Text
+Item_1_EditorType=EnumCombo
+Item_2_EditorType=Text
+Item_3_EditorType=Text
+Item_4_EditorType=EnumComboWithBtn
+Item_5_EditorType=BooleanCombo
+Item_6_EditorType=BooleanCombo
+Item_7_EditorType=Text
+MiscCount=0
+
+[Cat_3]
+Name=Constants
+CategoryComment=These values should resolve to Integer or String (or maybe arrays of these)
+Item_CountKey=Count
+CategoryEnabled=1
+StructureType=0
+CountableCount=3
+Item_0=Const_~Index~_Name
+Item_1=Const_~Index~_DataType
+Item_2=Const_~Index~_Value
+Item_0_EditorType=Text
+Item_1_EditorType=EnumCombo
+Item_2_EditorType=Text
+MiscCount=0
+
+[Cat_4]
+Name=ColorConstants
+CategoryComment=Here in base schema, ColorConstants must be resolved to integer or to one another up to one level of assignment.
+Item_CountKey=Count
+CategoryEnabled=1
+StructureType=0
+CountableCount=3
+Item_0=Const_~Index~_Name
+Item_1=Const_~Index~_DataType
+Item_2=Const_~Index~_Value
+Item_0_EditorType=Text
+Item_1_EditorType=EnumCombo
+Item_2_EditorType=Text
+MiscCount=0
