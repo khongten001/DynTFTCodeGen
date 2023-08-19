@@ -6,3 +6,4 @@ DynTFTCodeGen.pdf                                                     65D0472F49
 \ComponentPlugins\RemoteSystem\DynTFTCGRemoteSystem.dll               4C7792442CBE9E113B0C56FEB8FE5E3115AD2E702E37EA7C08ACA53DA1C7EA75
 \ComponentPlugins\RemoteSystem\Server\DynTFTCGRemoteSystemServer.exe  56308DD57829809F36672F706EAF20F4836214252CCEB0BF3393105A772EAA04  (Win32)
 \ComponentPlugins\RemoteSystem\Server\DynTFTCGRemoteSystemServer      09023E92B5FDFB136B2378C5C011AE612FA537E40C415CF663B32511B90B3433  (Lin32)
+\Tools\DrawingBoardSchemaEditor.exe                                   0762cbed514b5ab5d7fa370562fa129f405366b8ae6b4b652d2adc87c6ed489f

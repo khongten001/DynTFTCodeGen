@@ -7,7 +7,7 @@ Line_3=The ReservedComponentPropertiesSchema category contains properties which 
 
 [Settings]
 Title=Schema metadata for DynTFTCodeGen's component schema files.
-CategoryCount=14
+CategoryCount=15
 
 [PredefinedDataTypes]
 Count=5
@@ -18,6 +18,16 @@ DT_3=POnPageControlChangeEvent
 DT_4=POnRadioGroupSelectionChangedEvent
 
 [Cat_0]
+Name=DrawingBoardMetaSchema
+CategoryComment=Name of the metaschema file (.drbsch) which describes this structure. The $SelfDir$ var/replacement can be used to point to the path of the schema (this file (.dynscm)). The name "DrawingBoardMetaSchema" will be looked by the editor, to update the path when loading/saving this file.
+Item_CountKey=Count
+CategoryEnabled=1
+StructureType=2
+CountableCount=1
+Item_0=FileName
+Item_0_EditorType=TextWithArrow
+
+[Cat_1]
 Name=ComponentPropertiesSchema
 CategoryComment=Main component properties.
 Item_CountKey=Count
@@ -35,11 +45,11 @@ Item_0_EditorType=Text
 Item_1_EditorType=EnumCombo
 Item_2_EditorType=Text
 Item_3_EditorType=Text
-Item_4_EditorType=EnumComboWithBtn
-Item_5_EditorType=BooleanCombo
-Item_6_EditorType=BooleanCombo
+Item_4_EditorType=Text
+Item_5_EditorType=IntBooleanCombo
+Item_6_EditorType=IntBooleanCombo
 
-[Cat_1]
+[Cat_2]
 Name=ReservedComponentPropertiesSchema
 CategoryComment=Properties used for debugging. Should be copied to the ComponentPropertiesSchema category when needed. This list may also contain events, if they share the same structure.
 Item_CountKey=Count
@@ -57,11 +67,11 @@ Item_0_EditorType=Text
 Item_1_EditorType=EnumCombo
 Item_2_EditorType=Text
 Item_3_EditorType=Text
-Item_4_EditorType=EnumComboWithBtn
-Item_5_EditorType=BooleanCombo
-Item_6_EditorType=BooleanCombo
+Item_4_EditorType=Text
+Item_5_EditorType=IntBooleanCombo
+Item_6_EditorType=IntBooleanCombo
 
-[Cat_2]
+[Cat_3]
 Name=ComponentPropertiesOverrides
 CategoryComment=Property overrides for main component properties.
 Item_CountKey=Count
@@ -71,20 +81,11 @@ CountableCount=3
 Item_0=Prop_~Index~_Name
 Item_1=Prop_~Index~_DefaultValue
 Item_2=Prop_~Index~_ReadOnly
-;Item_#=Prop_~Index~_Description
-;Item_#=Prop_~Index~_AvailableOnCompilerDirectives
-;Item_#=Prop_~Index~_DesignTimeOnly
-;Item_#=Prop_~Index~_DataTypeDefinition
-;Item_#=Prop_~Index~_DataType
 Item_0_EditorType=Text
 Item_1_EditorType=Text
-Item_2_EditorType=BooleanCombo
-Item_#_EditorType=EnumCombo
-Item_#_EditorType=Text
-Item_#_EditorType=EnumComboWithBtn
-Item_#_EditorType=BooleanCombo
+Item_2_EditorType=IntBooleanCombo
 
-[Cat_3]
+[Cat_4]
 Name=ComponentEventsPropertiesSchema
 CategoryComment=Main component events.
 Item_CountKey=Count
@@ -103,12 +104,12 @@ Item_0_EditorType=Text
 Item_1_EditorType=EnumCombo
 Item_2_EditorType=Text
 Item_3_EditorType=Text
-Item_4_EditorType=EnumComboWithBtn
-Item_5_EditorType=BooleanCombo
-Item_6_EditorType=BooleanCombo
+Item_4_EditorType=Text
+Item_5_EditorType=IntBooleanCombo
+Item_6_EditorType=IntBooleanCombo
 Item_7_EditorType=Text
 
-[Cat_4]
+[Cat_5]
 Name=ComponentEventsOverrides
 CategoryComment=Property overrides for main component events.
 Item_CountKey=Count
@@ -118,20 +119,11 @@ CountableCount=3
 Item_0=Prop_~Index~_Name
 Item_1=Prop_~Index~_DefaultValue
 Item_2=Prop_~Index~_ReadOnly
-;Item_#=Prop_~Index~_Description
-;Item_#=Prop_~Index~_AvailableOnCompilerDirectives
-;Item_#=Prop_~Index~_DesignTimeOnly
-;Item_#=Prop_~Index~_DataTypeDefinition
-;Item_#=Prop_~Index~_DataType
 Item_0_EditorType=Text
 Item_1_EditorType=Text
 Item_2_EditorType=BooleanCombo
-Item_#_EditorType=EnumCombo
-Item_#_EditorType=Text
-Item_#_EditorType=EnumComboWithBtn
-Item_#_EditorType=BooleanCombo
 
-[Cat_5]
+[Cat_6]
 Name=Constants
 CategoryComment=These values should resolve to Integer or String (or maybe arrays of these)
 Item_CountKey=Count
@@ -145,7 +137,7 @@ Item_0_EditorType=Text
 Item_1_EditorType=EnumCombo
 Item_2_EditorType=Text
 
-[Cat_6]
+[Cat_7]
 Name=ColorConstants
 CategoryComment=Here in base schema, ColorConstants must be resolved to integer or to one another up to one level of assignment.
 Item_CountKey=Count
@@ -159,7 +151,7 @@ Item_0_EditorType=Text
 Item_1_EditorType=EnumCombo
 Item_2_EditorType=Text
 
-[Cat_7]
+[Cat_8]
 Name=OneTimeComponentInitCode_Interface
 CategoryComment=One time initialization code for components of this type, placed under the interface section. It may contain datatypes, vars, constants and headers. Indentation is available, using the "" character, instead of blank.
 Item_CountKey=Count
@@ -169,7 +161,7 @@ CountableCount=1
 Item_0=Line_~Index~
 Item_0_EditorType=UserEditor
 
-[Cat_8]
+[Cat_9]
 Name=OneTimeComponentInitCode_Implementation
 CategoryComment=One time initialization code for components of this type, placed under the implementation section. Indentation is available, using the "" character, instead of blank.
 Item_CountKey=Count
@@ -179,7 +171,7 @@ CountableCount=1
 Item_0=Line_~Index~
 Item_0_EditorType=UserEditor
 
-[Cat_9]
+[Cat_10]
 Name=PerInstanceInitConstants
 CategoryComment=Initialization constants for every instance of components of this type. Indentation is available, using the "" character, instead of blank. Replacements are available, by enclosing property names between "_<" and ">_". There are also some function replacements. Examples: "_<NoString_ObjectName>_", "_<Left>_", "_<Top>_", "_<Length(Items)>_", "_<CSV(Items)>_", "_<Items^.ActiveFont>__Font".
 Item_CountKey=Count
@@ -189,7 +181,7 @@ CountableCount=1
 Item_0=Line_~Index~
 Item_0_EditorType=UserEditor
 
-[Cat_10]
+[Cat_11]
 Name=PerInstanceInitCode
 CategoryComment=Initialization code for every instance of components of this type. Indentation is available, using the "" character, instead of blank. Replacements are available, by enclosing property names between "_<" and ">_". There are also some function replacements. Examples: "_<NoString_ObjectName>_", "_<Left>_", "_<Top>_", "_<Length(Items)>_", "_<CSV(Items)>_", "_<Items^.ActiveFont>__Font".
 Item_CountKey=Count
@@ -199,7 +191,7 @@ CountableCount=1
 Item_0=Line_~Index~
 Item_0_EditorType=UserEditor
 
-[Cat_11]
+[Cat_12]
 Name=CreateComponentCode
 CategoryComment=Creation code for every instance of components of this type. Indentation is available, using the "" character, instead of blank. Replacements are available, by enclosing property names between "_<" and ">_". There are also some function replacements. Examples: "_<NoString_ObjectName>_", "_<Left>_", "_<Top>_", "_<Length(Items)>_", "_<CSV(Items)>_", "_<Items^.ActiveFont>__Font".
 Item_CountKey=Count
@@ -209,7 +201,7 @@ CountableCount=1
 Item_0=Line_~Index~
 Item_0_EditorType=UserEditor
 
-[Cat_12]
+[Cat_13]
 Name=ComponentDependencies
 CategoryComment=List of components, which are required to be registered, because this component will require them.
 Item_CountKey=Count
@@ -219,7 +211,7 @@ CountableCount=1
 Item_0=Comp_~Index~_Name
 Item_0_EditorType=Text
 
-[Cat_13]
+[Cat_14]
 Name=ComponentRegistration
 CategoryComment=Name of the event registration procedure, then name of the component type function.
 Item_CountKey=Count
@@ -230,3 +222,4 @@ Item_0=RegisterEvents
 Item_1=GetComponentType
 Item_0_EditorType=Text
 Item_1_EditorType=Text
+

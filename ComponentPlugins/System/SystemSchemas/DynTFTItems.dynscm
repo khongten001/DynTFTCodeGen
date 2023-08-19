@@ -1,3 +1,7 @@
+[DrawingBoardMetaSchema]
+;Name of the metaschema file (.drbsch) which describes this structure. The $SelfDir$ var/replacement can be used to point to the path of the schema (this file (.dynscm)). The name "DrawingBoardMetaSchema" will be looked by the editor, to update the path when loading/saving this file.
+FileName=$SelfDir$\..\..\DynTFTComponents.drbsch
+
 [ComponentPropertiesSchema]
 Count=11
 Prop_0_Name=Font_Color

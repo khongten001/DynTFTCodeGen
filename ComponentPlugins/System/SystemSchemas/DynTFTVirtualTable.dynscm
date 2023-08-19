@@ -1,5 +1,6 @@
-[DrawingBoardSchema]
-FileName=..\..\DynTFTComponents.drbsch
+[DrawingBoardMetaSchema]
+;Name of the metaschema file (.drbsch) which describes this structure. The $SelfDir$ var/replacement can be used to point to the path of the schema (this file (.dynscm)). The name "DrawingBoardMetaSchema" will be looked by the editor, to update the path when loading/saving this file.
+FileName=$SelfDir$\..\..\DynTFTComponents.drbsch
 
 [ComponentPropertiesSchema]
 ;Main component properties.
@@ -273,10 +274,6 @@ Line_55=TempItems^.ActiveFont := AActiveFont;
 Line_56={$ENDIF}
 Line_57=end;
 Line_58=end;
-
-[OneTimeComponentInitCode]
-Count=1
-Line_0=//this is the default VirtualTable init code
 
 [PerInstanceInitConstants]
 ;Initialization constants for every instance of components of this type. Indentation is available, using the "" character, instead of blank. Replacements are available, by enclosing property names between "_<" and ">_". There are also some function replacements. Examples: "_<NoString_ObjectName>_", "_<Left>_", "_<Top>_", "_<Length(Items)>_", "_<CSV(Items)>_", "_<Items^.ActiveFont>__Font".

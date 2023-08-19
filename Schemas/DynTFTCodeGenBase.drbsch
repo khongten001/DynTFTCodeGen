@@ -11,7 +11,7 @@ Line_7=-  2 = Misc keys (see ComponentRegistration).
 
 [Settings]
 Title=Schema metadata for DynTFTCodeGen's BaseSchema.dynscm.
-CategoryCount=5
+CategoryCount=6
 
 [PredefinedDataTypes]
 Count=13
@@ -30,6 +30,16 @@ DT_11=Array of Integer
 DT_12=PDynTFTOnMouseEvent
 
 [Cat_0]
+Name=DrawingBoardMetaSchema
+CategoryComment=Name of the metaschema file (.drbsch) which describes this structure. The $SelfDir$ var/replacement can be used to point to the path of the schema (this file (.dynscm)). The name "DrawingBoardMetaSchema" will be looked by the editor, to update the path when loading/saving this file.
+Item_CountKey=Count
+CategoryEnabled=1
+StructureType=2
+CountableCount=1
+Item_0=FileName
+Item_0_EditorType=TextWithArrow
+
+[Cat_1]
 Name=ComponentPropertiesSchema
 CategoryComment=Main component properties.
 Item_CountKey=Count
@@ -47,12 +57,11 @@ Item_0_EditorType=Text
 Item_1_EditorType=EnumCombo
 Item_2_EditorType=Text
 Item_3_EditorType=Text
-Item_4_EditorType=EnumComboWithBtn
-Item_5_EditorType=BooleanCombo
-Item_6_EditorType=BooleanCombo
-MiscCount=0
+Item_4_EditorType=Text
+Item_5_EditorType=IntBooleanCombo
+Item_6_EditorType=IntBooleanCombo
 
-[Cat_1]
+[Cat_2]
 Name=ReservedComponentPropertiesSchema
 CategoryComment=Properties used for debugging. Should be copied to the ComponentPropertiesSchema category when needed. This list may also contain events, if they share the same structure.
 Item_CountKey=Count
@@ -70,12 +79,11 @@ Item_0_EditorType=Text
 Item_1_EditorType=EnumCombo
 Item_2_EditorType=Text
 Item_3_EditorType=Text
-Item_4_EditorType=EnumComboWithBtn
-Item_5_EditorType=BooleanCombo
-Item_6_EditorType=BooleanCombo
-MiscCount=0
+Item_4_EditorType=Text
+Item_5_EditorType=IntBooleanCombo
+Item_6_EditorType=IntBooleanCombo
 
-[Cat_2]
+[Cat_3]
 Name=ComponentEventsPropertiesSchema
 CategoryComment=Main component events.
 Item_CountKey=Count
@@ -94,13 +102,12 @@ Item_0_EditorType=Text
 Item_1_EditorType=EnumCombo
 Item_2_EditorType=Text
 Item_3_EditorType=Text
-Item_4_EditorType=EnumComboWithBtn
-Item_5_EditorType=BooleanCombo
-Item_6_EditorType=BooleanCombo
+Item_4_EditorType=Text
+Item_5_EditorType=IntBooleanCombo
+Item_6_EditorType=IntBooleanCombo
 Item_7_EditorType=Text
-MiscCount=0
 
-[Cat_3]
+[Cat_4]
 Name=Constants
 CategoryComment=These values should resolve to Integer or String (or maybe arrays of these)
 Item_CountKey=Count
@@ -113,9 +120,8 @@ Item_2=Const_~Index~_Value
 Item_0_EditorType=Text
 Item_1_EditorType=EnumCombo
 Item_2_EditorType=Text
-MiscCount=0
 
-[Cat_4]
+[Cat_5]
 Name=ColorConstants
 CategoryComment=Here in base schema, ColorConstants must be resolved to integer or to one another up to one level of assignment.
 Item_CountKey=Count
@@ -128,4 +134,3 @@ Item_2=Const_~Index~_Value
 Item_0_EditorType=Text
 Item_1_EditorType=EnumCombo
 Item_2_EditorType=Text
-MiscCount=0
